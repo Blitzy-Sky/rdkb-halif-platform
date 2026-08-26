@@ -55,12 +55,12 @@
 *     threads, in which case it is responsible for synchronising its own calls and events
 *     and for cleaning those threads up. All functions are expected to be callable from more
 *     than one process.
-* @li <b>Memory model.</b> Unless a function states otherwise, the caller allocates and
-*     releases every buffer it passes in, the buffer remains owned by the caller, and the
-*     implementation does not retain the pointer once the call has returned.
-*     @c platform_hal_GetMemoryPaths is the one documented exception, where the HAL performs
-*     the allocation. A vendor implementation may make further internal allocations, which
-*     it is responsible for releasing itself.
+* @li <b>Memory model.</b> Unless a function states otherwise, the caller allocates and releases every buffer it passes in and
+*     the buffer remains owned by the caller. This interface does not specify whether an implementation keeps a caller-supplied
+*     pointer beyond the call that carried it, so a caller must not assume either behaviour: nothing stated here guarantees that the
+*     implementation has dropped the pointer by the time the call returns, and a caller that needs that guarantee must obtain it from
+*     the implementation it runs against. @c platform_hal_GetMemoryPaths is the one documented exception, where the HAL performs the
+*     allocation. A vendor implementation may make further internal allocations, which it is responsible for releasing itself.
 * @li <b>Error reporting.</b> Errors are reported synchronously through the return value.
 *     System-level errors such as memory exhaustion are handled inside the HAL and are not
 *     surfaced as separate codes, so the return value is the only failure indication a
@@ -231,18 +231,18 @@ extern "C"{
  * RDK framework.
  */
 typedef enum {
-   HOST_CPU=0,          /**< Represents the main host CPU, which typically handles 
-                             primary tasks and operations in the RDK environment. */
+   HOST_CPU=0,          /**< Represents the main host CPU, which typically handles
+                         *   primary tasks and operations in the RDK environment. */
 
-   PEER_CPU=1,          /**< Represents a secondary or peer CPU. These CPUs might be 
-                             used for offloading specific tasks, handling parallel 
-                             processes, or managing other dedicated operations 
-                             alongside the main host CPU. */
+   PEER_CPU=1,          /**< Represents a secondary or peer CPU. These CPUs might be
+                         *   used for offloading specific tasks, handling parallel
+                         *   processes, or managing other dedicated operations
+                         *   alongside the main host CPU. */
 
-   NOT_SUPPORTED_CPU=3  /**< Denotes an unsupported or unrecognized CPU type. This value 
-                             can be used to identify and handle scenarios where a CPU type 
-                             is encountered that doesn't match known configurations in 
-                             the RDK environment. */
+   NOT_SUPPORTED_CPU=3  /**< Denotes an unsupported or unrecognized CPU type. This value
+                         *   can be used to identify and handle scenarios where a CPU type
+                         *   is encountered that doesn't match known configurations in
+                         *   the RDK environment. */
 } 
 RDK_CPUS; //!< Enum type indicating the CPU classifications within the RDK framework.
 
@@ -266,22 +266,22 @@ RDK_CPUS; //!< Enum type indicating the CPU classifications within the RDK frame
 typedef struct _PLAT_PROC_MEM_INFO
 {
     CHAR dramPath[PLAT_PROC_MEM_MAX_LEN];   /**< @brief Path to DRAM memory.
-                                                Typically set to "/tmp".
-                                                Ensure the path doesn't exceed
-                                                a 40-byte buffer size. */
+                                             *   Typically set to "/tmp".
+                                             *   Ensure the path doesn't exceed
+                                             *   a 40-byte buffer size. */
 
     CHAR emmcPath1[PLAT_PROC_MEM_MAX_LEN];  /**< @brief Path to the first eMMC memory.
-                                                Possible values include "/nvram".
-                                                Path should not exceed 40 bytes. */
+                                             *   Possible values include "/nvram".
+                                             *   Path should not exceed 40 bytes. */
 
     CHAR emmcPath2[PLAT_PROC_MEM_MAX_LEN];  /**< @brief Path to the second eMMC memory.
-                                                "/nvram2" is a common value.
-                                                Ensure path is under 40 bytes. */
+                                             *   "/nvram2" is a common value.
+                                             *   Ensure path is under 40 bytes. */
 
     CHAR emmcPath3[PLAT_PROC_MEM_MAX_LEN];  /**< @brief Path to the third eMMC memory.
-                                                This field is currently unused.
-                                                Despite this, its value should
-                                                not exceed 40 bytes. */
+                                             *   This field is currently unused.
+                                             *   Despite this, its value should
+                                             *   not exceed 40 bytes. */
 }
 PLAT_PROC_MEM_INFO, *PPLAT_PROC_MEM_INFO;
 
@@ -305,11 +305,17 @@ PLAT_PROC_MEM_INFO, *PPLAT_PROC_MEM_INFO;
  * Lets a caller decide whether configuration-dependent work may proceed yet, by returning the
  * platform's current configuration state as a short text token.
  *
- * @param[out] pValue - Caller-allocated, caller-owned buffer receiving the zero-terminated
- *                      status string. Possible values are 'WaitForImplement', 'In Progress' and
- *                      'Complete'. The buffer must be at least 128 bytes, the recommended maximum
- *                      length of the returned string. The implementation does not retain the
- *                      pointer after the call returns.
+ * @param[out] pValue - Caller-allocated, caller-owned buffer receiving the status string as text.
+ *                      Possible values are 'WaitForImplement', 'In Progress' and 'Complete'. The
+ *                      buffer must be at least 128 bytes, the recommended maximum length of the
+ *                      returned string. This interface states neither how many bytes the
+ *                      implementation writes nor whether it writes a terminator, so a caller must
+ *                      bound every read to the 128 bytes it supplied and, where a terminated string
+ *                      is required, must do so itself: zero-filling alone leaves no terminator if
+ *                      the implementation writes the whole buffer, so allocate one byte beyond the
+ *                      size this interface requires and zero that byte before the call. This
+ *                      interface does not specify whether the implementation keeps the pointer
+ *                      after the call returns.
  *
  * @pre @c pValue must point to a caller-allocated buffer of at least 128 bytes. This interface does
  *      not define the behaviour for a null or undersized buffer, so a caller must not rely
@@ -334,8 +340,8 @@ INT platform_hal_GetDeviceConfigStatus(CHAR *pValue);
  * @brief Reports whether Telnet access is currently enabled.
  *
  * @param[out] pFlag - Caller-allocated, caller-owned @c BOOLEAN receiving the current setting.
- *                     Set to @c TRUE when Telnet is enabled and @c FALSE when it is disabled.
- *                     The implementation does not retain the pointer after the call returns.
+ *                     Set to @c TRUE when Telnet is enabled and @c FALSE when it is disabled. This interface does
+ *                     not specify whether the implementation keeps the pointer after the call returns.
  *
  * @pre @c pFlag must point to a caller-allocated buffer of at least one BOOLEAN. This interface does
  *      not define the behaviour for a null or undersized buffer, so a caller must not rely
@@ -385,8 +391,8 @@ INT platform_hal_SetTelnetEnable(BOOLEAN Flag);
  * @brief Reports whether SSH access is currently enabled.
  *
  * @param[out] pFlag - Caller-allocated, caller-owned @c BOOLEAN receiving the current setting.
- *                     Set to @c TRUE when SSH is enabled and @c FALSE when it is disabled. The
- *                     implementation does not retain the pointer after the call returns.
+ *                     Set to @c TRUE when SSH is enabled and @c FALSE when it is disabled. This interface does not
+ *                     specify whether the implementation keeps the pointer after the call returns.
  *
  * @pre @c pFlag must point to a caller-allocated buffer of at least one BOOLEAN. This interface does
  *      not define the behaviour for a null or undersized buffer, so a caller must not rely
@@ -435,12 +441,17 @@ INT platform_hal_SetSSHEnable(BOOLEAN Flag);
 /**
  * @brief Reports which interface scope SNMP is currently enabled for.
  *
- * @param[out] pValue - Caller-allocated, caller-owned buffer receiving the zero-terminated scope
- *                      token. The buffer must be at least 32 bytes, the recommended maximum length
- *                      of the returned string. Possible values are 'rgWan' (SNMP enabled for the
- *                      WAN interface), 'rgDualIp' (enabled for a dual-IP configuration) and
- *                      'rgLanIp' (enabled for the LAN IP configuration). The implementation does
- *                      not retain the pointer after the call returns.
+ * @param[out] pValue - Caller-allocated, caller-owned buffer receiving the scope token as text. The
+ *                      buffer must be at least 32 bytes, the recommended maximum length of the returned
+ *                      string. Possible values are 'rgWan' (SNMP enabled for the WAN interface),
+ *                      'rgDualIp' (enabled for a dual-IP configuration) and 'rgLanIp' (enabled for the
+ *                      LAN IP configuration). This interface states neither how many bytes the
+ *                      implementation writes nor whether it writes a terminator, so a caller must bound
+ *                      every read to the 32 bytes it supplied and, where a terminated string is
+ *                      required, must do so itself: zero-filling alone leaves no terminator if the
+ *                      implementation writes the whole buffer, so allocate one byte beyond the size this
+ *                      interface requires and zero that byte before the call. This interface does not
+ *                      specify whether the implementation keeps the pointer after the call returns.
  *
  * @pre @c pValue must point to a caller-allocated buffer of at least 32 bytes. This interface does
  *      not define the behaviour for a null or undersized buffer, so a caller must not rely
@@ -464,11 +475,13 @@ INT platform_hal_GetSNMPEnable(CHAR *pValue);
 /**
  * @brief Selects the interface scope SNMP is enabled for.
  *
- * @param[in] pValue - Caller-allocated, caller-owned buffer holding the zero-terminated scope
- *                     token to apply, of at least 32 bytes. Accepted values are 'rgWan' (enable
- *                     SNMP for the WAN interface), 'rgDualIp' (enable for a dual-IP configuration)
- *                     and 'rgLanIp' (enable for the LAN IP configuration). The buffer is read
- *                     during the call only; the implementation does not retain the pointer.
+ * @param[in] pValue - Caller-allocated, caller-owned buffer of at least 32 bytes. The caller must
+ *                     supply the scope token to apply as a zero-terminated string; termination is the
+ *                     caller's obligation on the value it passes in. Accepted values are 'rgWan' (enable
+ *                     SNMP for the WAN interface), 'rgDualIp' (enable for a dual-IP configuration) and
+ *                     'rgLanIp' (enable for the LAN IP configuration). The buffer is read during the call;
+ *                     this interface does not specify whether the implementation keeps the pointer after
+ *                     the call returns.
  *
  * @pre @c pValue must point to a caller-allocated buffer of at least 32 bytes. This interface does
  *      not define the behaviour for a null or undersized buffer, so a caller must not rely
@@ -493,15 +506,15 @@ INT platform_hal_SetSNMPEnable(CHAR *pValue);
 /**
  * @brief Reports the configured web user-interface inactivity timeout.
  *
- * @param[out] pValue - Caller-allocated, caller-owned @c ULONG receiving the timeout in seconds.
- *                      The valid range is 30 to 86400 seconds and the default is 840 seconds. The
- *                      implementation does not retain the pointer after the call returns.
+ * @param[out] pValue - Caller-allocated, caller-owned @c ULONG receiving the timeout in seconds. This call documents the value as lying
+ *                      between 30 and 86400 seconds with a default of 840, which is narrower than the domain @c platform_hal_SetWebUITimeout
+ *                      accepts: that call also accepts 0. This interface does not state what a read of 0 means, nor whether a read can return it,
+ *                      so a caller must treat 0, and any other value outside 30 to 86400, as unspecified. This interface does not specify whether the implementation keeps the pointer after the call returns.
  *
- * @pre @c pValue must point to a caller-allocated buffer of at least one ULONG. This interface does
- *      not define the behaviour for a null or undersized buffer, so a caller must not rely
- *      on either being detected.
- * @post On success the referenced @c ULONG holds a value in the documented range. On failure this
- *       interface does not define its value.
+ * @pre @c pValue must point to a caller-allocated buffer of at least one ULONG. This interface does not define the behaviour for a
+ *      null or undersized buffer, so a caller must not rely on either being detected.
+ * @post On success the referenced @c ULONG holds the configured timeout; because the setter's accepted domain is wider than the range
+ *       documented above, this interface does not guarantee that the value falls inside that range. On failure it does not define the value at all.
  *
  * @returns The status of the operation.
  * @retval RETURN_OK if successful.
@@ -519,9 +532,9 @@ INT platform_hal_GetWebUITimeout(ULONG *pValue);
 /**
  * @brief Sets the web user-interface inactivity timeout.
  *
- * @param[in] value - Timeout to apply, in seconds, passed by value. Accepted values are 0, and any
- *                    value from 30 to 86400 inclusive. A value of 0 may select a distinct mode such
- *                    as no timeout; this interface does not define which.
+ * @param[in] value - Timeout to apply, in seconds, passed by value. Accepted values are 0, and any value from 30 to 86400 inclusive. A value of 0
+ *                    may select a distinct mode such as no timeout; this interface does not define which. @c platform_hal_GetWebUITimeout documents a
+ *                    narrower read range of 30 to 86400, so after writing 0 a caller cannot rely on the read-back falling inside the range that call documents.
  *
  * @pre None established by this interface. This interface does not define the behaviour for a value
  *      between 1 and 29 or above 86400.
@@ -549,9 +562,9 @@ INT platform_hal_SetWebUITimeout(ULONG value);
  *                        gives meaning to are tabulated on @c platform_hal_SetWebAccessLevel.
  * @param[in] ifIndex - Interface index identifying which interface the level applies to. The
  *                      representable range is -2^31 to (2^31)-1.
- * @param[out] pValue - Caller-allocated, caller-owned @c ULONG receiving the access level, in the
- *                      range 0 to (2^31)-1. The implementation does not retain the pointer after
- *                      the call returns.
+ * @param[out] pValue - Caller-allocated, caller-owned @c ULONG receiving the
+ *                      access level, in the range 0 to (2^31)-1. This interface does not specify
+ *                      whether the implementation keeps the pointer after the call returns.
  *
  * @pre @c pValue must point to a caller-allocated buffer of at least one ULONG. This interface does
  *      not define the behaviour for a null or undersized buffer, so a caller must not rely
@@ -686,10 +699,15 @@ INT platform_hal_DocsisParamsDBInit(void);
  * Returns the vendor-assigned model identifier for the board, which a caller can use to select
  * model-specific behaviour.
  *
- * @param[out] pValue - Caller-allocated, caller-owned buffer receiving the zero-terminated
- *                      model name. The value is vendor specific. The buffer must be at least
- *                      256 bytes, the maximum length this interface allows for a model name. The implementation does not retain the pointer after the
- *                      call returns.
+ * @param[out] pValue - Caller-allocated, caller-owned buffer receiving the model name as text. The value
+ *                      is vendor specific. The buffer must be at least 256 bytes, the maximum length this
+ *                      interface allows for a model name. This interface states neither how many bytes
+ *                      the implementation writes nor whether it writes a terminator, so a caller must
+ *                      bound every read to the 256 bytes it supplied and, where a terminated string is
+ *                      required, must do so itself: zero-filling alone leaves no terminator if the
+ *                      implementation writes the whole buffer, so allocate one byte beyond the size this
+ *                      interface requires and zero that byte before the call. This interface does not
+ *                      specify whether the implementation keeps the pointer after the call returns.
  *
  * @pre @c pValue must point to a caller-allocated buffer of at least 256 bytes. This interface does
  *      not define the behaviour for a null or undersized buffer, so a caller must not rely
@@ -718,11 +736,16 @@ INT platform_hal_GetModelName(CHAR *pValue);
  *
  * Returns the region code that governs region-dependent behaviour such as regulatory limits.
  *
- * @param[out] pValue - Caller-allocated, caller-owned buffer receiving the zero-terminated
- *                      region name. Possible values are `REGION_UK`, `REGION_IT`, `REGION_ROI`
- *                      and `REGION_UNKNOWN`. The buffer must be at least 256 bytes, the maximum
- *                      length this interface allows for a region name. The implementation does not retain the pointer after the
- *                      call returns.
+ * @param[out] pValue - Caller-allocated, caller-owned buffer receiving the region name as text. Possible
+ *                      values are `REGION_UK`, `REGION_IT`, `REGION_ROI` and `REGION_UNKNOWN`. The
+ *                      buffer must be at least 256 bytes, the maximum length this interface allows for a
+ *                      region name. This interface states neither how many bytes the implementation
+ *                      writes nor whether it writes a terminator, so a caller must bound every read to
+ *                      the 256 bytes it supplied and, where a terminated string is required, must do so
+ *                      itself: zero-filling alone leaves no terminator if the implementation writes the
+ *                      whole buffer, so allocate one byte beyond the size this interface requires and
+ *                      zero that byte before the call. This interface does not specify whether the
+ *                      implementation keeps the pointer after the call returns.
  *
  * @pre @c pValue must point to a caller-allocated buffer of at least 256 bytes. This interface does
  *      not define the behaviour for a null or undersized buffer, so a caller must not rely
@@ -751,11 +774,17 @@ INT platform_hal_GetRouterRegion(CHAR *pValue);
  *
  * Returns the vendor-assigned serial number that uniquely identifies this unit.
  *
- * @param[out] pValue - Caller-allocated, caller-owned buffer receiving the zero-terminated
- *                      serial number. The value is vendor specific. The buffer must be at
- *                      least 256 bytes, the maximum length this interface allows for a serial
- *                      number. The implementation does not retain the pointer after the
- *                      call returns.
+ * @param[out] pValue - Caller-allocated, caller-owned buffer receiving the serial number as
+ *                      text. The value is vendor specific. The buffer must be at least 256
+ *                      bytes, the maximum length this interface allows for a serial number.
+ *                      This interface states neither how many bytes the implementation writes
+ *                      nor whether it writes a terminator, so a caller must bound every read
+ *                      to the 256 bytes it supplied and, where a terminated string is
+ *                      required, must do so itself: zero-filling alone leaves no terminator
+ *                      if the implementation writes the whole buffer, so allocate one byte
+ *                      beyond the size this interface requires and zero that byte before the
+ *                      call. This interface does not specify whether the implementation keeps
+ *                      the pointer after the call returns.
  *
  * @pre @c pValue must point to a caller-allocated buffer of at least 256 bytes. This interface does
  *      not define the behaviour for a null or undersized buffer, so a caller must not rely
@@ -785,11 +814,17 @@ INT platform_hal_GetSerialNumber(CHAR *pValue);
  * Returns the vendor-assigned hardware version string, which a caller can use to distinguish
  * board revisions that behave differently.
  *
- * @param[out] pValue - Caller-allocated, caller-owned buffer receiving the zero-terminated
- *                      hardware version. The value is vendor specific. The buffer must be at
- *                      least 256 bytes, the maximum length this interface allows for a hardware
- *                      version string. The implementation does not retain the pointer after the
- *                      call returns.
+ * @param[out] pValue - Caller-allocated, caller-owned buffer receiving the hardware version as
+ *                      text. The value is vendor specific. The buffer must be at least 256
+ *                      bytes, the maximum length this interface allows for a hardware version
+ *                      string. This interface states neither how many bytes the implementation
+ *                      writes nor whether it writes a terminator, so a caller must bound every
+ *                      read to the 256 bytes it supplied and, where a terminated string is
+ *                      required, must do so itself: zero-filling alone leaves no terminator if
+ *                      the implementation writes the whole buffer, so allocate one byte beyond
+ *                      the size this interface requires and zero that byte before the call.
+ *                      This interface does not specify whether the implementation keeps the
+ *                      pointer after the call returns.
  *
  * @pre @c pValue must point to a caller-allocated buffer of at least 256 bytes. This interface does
  *      not define the behaviour for a null or undersized buffer, so a caller must not rely
@@ -818,9 +853,15 @@ INT platform_hal_GetHardwareVersion(CHAR *pValue);
  *
  * Returns the version of the firmware the device is running.
  *
- * @param[out] pValue - Caller-allocated, caller-owned buffer receiving the zero-terminated
- *                      value. The value is vendor specific. The implementation does not
- *                      retain the pointer after the call returns.
+ * @param[out] pValue - Caller-allocated, caller-owned buffer receiving the software version as text.
+ *                      The value is vendor specific. This interface states neither how many bytes
+ *                      the implementation writes nor whether it writes a terminator, so a caller
+ *                      must bound every read to the @c maxSize bytes it reported and, where a
+ *                      terminated string is required, must do so itself: zero-filling alone leaves
+ *                      no terminator if the implementation writes the whole buffer, so report a
+ *                      @c maxSize one byte short of the allocation and zero the byte beyond it
+ *                      before the call. This interface does not specify whether the implementation
+ *                      keeps the pointer after the call returns.
  * @param[in] maxSize - Size in bytes of the buffer supplied in @c pValue, passed by value.
  *
  * @pre @c pValue must point to a caller-allocated buffer of at least @c maxSize bytes.
@@ -850,9 +891,15 @@ INT platform_hal_GetSoftwareVersion(CHAR* pValue, ULONG maxSize);
  *
  * Returns the version of the bootloader the device starts from.
  *
- * @param[out] pValue - Caller-allocated, caller-owned buffer receiving the zero-terminated
- *                      value. The value is vendor specific. The implementation does not
- *                      retain the pointer after the call returns.
+ * @param[out] pValue - Caller-allocated, caller-owned buffer receiving the bootloader version as
+ *                      text. The value is vendor specific. This interface states neither how many
+ *                      bytes the implementation writes nor whether it writes a terminator, so a
+ *                      caller must bound every read to the @c maxSize bytes it reported and, where a
+ *                      terminated string is required, must do so itself: zero-filling alone leaves
+ *                      no terminator if the implementation writes the whole buffer, so report a
+ *                      @c maxSize one byte short of the allocation and zero the byte beyond it
+ *                      before the call. This interface does not specify whether the implementation
+ *                      keeps the pointer after the call returns.
  * @param[in] maxSize - Size in bytes of the buffer supplied in @c pValue, passed by value.
  *
  * @pre @c pValue must point to a caller-allocated buffer of at least @c maxSize bytes.
@@ -883,9 +930,15 @@ INT platform_hal_GetBootloaderVersion(CHAR *pValue, ULONG maxSize);
  * Returns the image name of the running firmware, which a caller can compare against an expected
  * build.
  *
- * @param[out] pValue - Caller-allocated, caller-owned buffer receiving the zero-terminated
- *                      value. The value is vendor specific. The implementation does not
- *                      retain the pointer after the call returns.
+ * @param[out] pValue - Caller-allocated, caller-owned buffer receiving the firmware image name as
+ *                      text. The value is vendor specific. This interface states neither how many
+ *                      bytes the implementation writes nor whether it writes a terminator, so a
+ *                      caller must bound every read to the @c maxSize bytes it reported and, where a
+ *                      terminated string is required, must do so itself: zero-filling alone leaves
+ *                      no terminator if the implementation writes the whole buffer, so report a
+ *                      @c maxSize one byte short of the allocation and zero the byte beyond it
+ *                      before the call. This interface does not specify whether the implementation
+ *                      keeps the pointer after the call returns.
  * @param[in] maxSize - Size in bytes of the buffer supplied in @c pValue, passed by value.
  *
  * @pre @c pValue must point to a caller-allocated buffer of at least @c maxSize bytes.
@@ -916,12 +969,12 @@ INT platform_hal_GetFirmwareName(CHAR *pValue, ULONG maxSize);
  * Returns the address from which the device derives the MAC addresses of its individual
  * interfaces.
  *
- * @param[out] pValue - Caller-allocated, caller-owned buffer receiving the zero-terminated
- *                      base MAC address, formatted as colon-separated octets, for example
- *                      AA:BB:CC:DD:EE:FF. The buffer must be at least 256 bytes, which this
- *                      interface allows for the address text and any terminator or additional
- *                      information. The implementation does not retain the pointer after the
- *                      call returns.
+ * @param[out] pValue - Caller-allocated, caller-owned buffer receiving
+ *                      the zero-terminated base MAC address, formatted as colon-separated
+ *                      octets, for example AA:BB:CC:DD:EE:FF. The buffer must be at least
+ *                      256 bytes, which this interface allows for the address text and any
+ *                      terminator or additional information. This interface does not specify
+ *                      whether the implementation keeps the pointer after the call returns.
  *
  * @pre @c pValue must point to a caller-allocated buffer of at least 256 bytes. This interface does
  *      not define the behaviour for a null or undersized buffer, so a caller must not rely
@@ -951,11 +1004,17 @@ INT platform_hal_GetBaseMacAddress(CHAR *pValue);
  * Returns the size of the whole flash device as decimal text rather than as a number, so a caller
  * that needs an integer must convert it.
  *
- * @param[out] pValue - Caller-allocated, caller-owned buffer receiving the zero-terminated
- *                      total flash size in MB, in the range 1 to 4096, which are the smallest
- *                      and largest sizes this interface allows. The buffer must be at least 256
- *                      bytes. The implementation does not retain the pointer after the
- *                      call returns.
+ * @param[out] pValue - Caller-allocated, caller-owned buffer receiving the total flash size in
+ *                      MB as decimal text, in the range 1 to 4096, which are the smallest and
+ *                      largest sizes this interface allows. The buffer must be at least 256
+ *                      bytes. This interface states neither how many bytes the implementation
+ *                      writes nor whether it writes a terminator, so a caller must bound every
+ *                      read to the 256 bytes it supplied and, where a terminated string is
+ *                      required, must do so itself: zero-filling alone leaves no terminator if
+ *                      the implementation writes the whole buffer, so allocate one byte beyond
+ *                      the size this interface requires and zero that byte before the call.
+ *                      This interface does not specify whether the implementation keeps the
+ *                      pointer after the call returns.
  *
  * @pre @c pValue must point to a caller-allocated buffer of at least 256 bytes. This interface does
  *      not define the behaviour for a null or undersized buffer, so a caller must not rely
@@ -984,11 +1043,17 @@ INT platform_hal_GetHardware(CHAR *pValue);
  *
  * Returns the amount of flash currently occupied, as decimal text rather than as a number.
  *
- * @param[out] pValue - Caller-allocated, caller-owned buffer receiving the zero-terminated
- *                      used flash size in MB, in the range 1 to n inclusive, where n is the
- *                      total flash size of the device in MB. The buffer must be at least 1024
- *                      bytes and no more than 2048 bytes. The implementation does not retain the pointer after the
- *                      call returns.
+ * @param[out] pValue - Caller-allocated, caller-owned buffer receiving the used flash size in MB as
+ *                      decimal text, in the range 1 to n inclusive, where n is the total flash size
+ *                      of the device in MB. The buffer must be at least 1024 bytes and no more than
+ *                      2048 bytes. This interface states neither how many bytes the implementation
+ *                      writes nor whether it writes a terminator, so a caller must bound every read
+ *                      to the buffer capacity it supplied and, where a terminated string is
+ *                      required, must do so itself: zero-filling alone leaves no terminator if the
+ *                      implementation writes the whole buffer, so allocate one byte beyond the size
+ *                      this interface requires and zero that byte before the call. This interface
+ *                      does not specify whether the implementation keeps the pointer after the call
+ *                      returns.
  *
  * @pre @c pValue must point to a caller-allocated buffer of at least 1024 bytes, and no more than 2048 bytes. This interface does
  *      not define the behaviour for a null or undersized buffer, so a caller must not rely
@@ -1017,11 +1082,11 @@ INT platform_hal_GetHardware_MemUsed(CHAR *pValue);
  *
  * Returns the amount of flash still free, as decimal text rather than as a number.
  *
- * @param[out] pValue - Caller-allocated, caller-owned buffer receiving the zero-terminated
- *                      available flash size in MB, in the range 1 to n inclusive, where n is
- *                      the total flash size less the space in use. The returned string is zero
- *                      terminated. The buffer must be at least 1024 bytes. The implementation does not retain the pointer after the
- *                      call returns.
+ * @param[out] pValue - Caller-allocated, caller-owned buffer receiving the
+ *                      zero-terminated available flash size in MB, in the range 1 to n inclusive, where
+ *                      n is the total flash size less the space in use. The returned string is zero
+ *                      terminated. The buffer must be at least 1024 bytes. This interface does not
+ *                      specify whether the implementation keeps the pointer after the call returns.
  *
  * @pre @c pValue must point to a caller-allocated buffer of at least 1024 bytes. This interface does
  *      not define the behaviour for a null or undersized buffer, so a caller must not rely
@@ -1050,10 +1115,10 @@ INT platform_hal_GetHardware_MemFree(CHAR *pValue);
  *
  * Returns the total volatile memory fitted to the device, as a number.
  *
- * @param[out] pulSize - Caller-allocated, caller-owned @c ULONG receiving the size in MB.
- *                      The value lies in the range 1 to n inclusive, where n is the
- *                      largest DRAM size available on the device in MB. The implementation does not retain the pointer
- *                      after the call returns.
+ * @param[out] pulSize - Caller-allocated, caller-owned @c ULONG receiving the
+ *                      size in MB. The value lies in the range 1 to n inclusive, where n is the
+ *                      largest DRAM size available on the device in MB. This interface does not
+ *                      specify whether the implementation keeps the pointer after the call returns.
  *
  * @pre @c pulSize must point to a caller-allocated buffer of at least one ULONG. This interface does
  *      not define the behaviour for a null or undersized buffer, so a caller must not rely
@@ -1079,10 +1144,10 @@ INT platform_hal_GetTotalMemorySize(ULONG *pulSize);
  *
  * Returns how much volatile memory the system is currently occupying, as a number.
  *
- * @param[out] pulSize - Caller-allocated, caller-owned @c ULONG receiving the size in MB.
- *                      The value lies in the range 1 to n inclusive, where n is the
- *                      total DRAM size available on the device in MB. The implementation does not retain the pointer
- *                      after the call returns.
+ * @param[out] pulSize - Caller-allocated, caller-owned @c ULONG receiving the
+ *                      size in MB. The value lies in the range 1 to n inclusive, where n is the
+ *                      total DRAM size available on the device in MB. This interface does not
+ *                      specify whether the implementation keeps the pointer after the call returns.
  *
  * @pre @c pulSize must point to a caller-allocated buffer of at least one ULONG. This interface does
  *      not define the behaviour for a null or undersized buffer, so a caller must not rely
@@ -1108,10 +1173,10 @@ INT platform_hal_GetUsedMemorySize(ULONG *pulSize);
  *
  * Returns how much volatile memory remains available, as a number.
  *
- * @param[out] pulSize - Caller-allocated, caller-owned @c ULONG receiving the size in MB.
- *                      The value lies in the range 1 to n inclusive, where n is the
- *                      total DRAM size available on the device in MB. The implementation does not retain the pointer
- *                      after the call returns.
+ * @param[out] pulSize - Caller-allocated, caller-owned @c ULONG receiving the
+ *                      size in MB. The value lies in the range 1 to n inclusive, where n is the
+ *                      total DRAM size available on the device in MB. This interface does not
+ *                      specify whether the implementation keeps the pointer after the call returns.
  *
  * @pre @c pulSize must point to a caller-allocated buffer of at least one ULONG. This interface does
  *      not define the behaviour for a null or undersized buffer, so a caller must not rely
@@ -1137,9 +1202,9 @@ INT platform_hal_GetFreeMemorySize(ULONG *pulSize);
  *
  * Reports the counter published as Device.DeviceInfo.FactoryResetCount.
  *
- * @param[out] pulSize - Caller-allocated, caller-owned @c ULONG receiving the count, which is 0
- *                       or greater. The implementation does not retain the pointer after the call
- *                       returns.
+ * @param[out] pulSize - Caller-allocated, caller-owned @c ULONG receiving
+ *                       the count, which is 0 or greater. This interface does not specify
+ *                       whether the implementation keeps the pointer after the call returns.
  *
  * @pre @c pulSize must point to a caller-allocated buffer of at least one ULONG. This interface does
  *      not define the behaviour for a null or undersized buffer, so a caller must not rely
@@ -1192,12 +1257,18 @@ INT platform_hal_ClearResetCount(BOOLEAN bFlag);
  * Reports the value published as Device.DeviceInfo.TimeOffset, expressed in seconds relative to
  * UTC and returned as signed decimal text rather than as a number.
  *
- * @param[out] timeOffSet - Caller-allocated, caller-owned buffer receiving the zero-terminated
- *                          offset in seconds. Examples of valid values are '-25200' (Eastern
- *                          Standard Time, UTC-5), '-18000' (Mountain Standard Time, UTC-7, the
- *                          default) and '+25200' (Indonesia Western Time, UTC+7). The buffer must
- *                          be at least 256 bytes. The implementation does not retain the pointer
- *                          after the call returns.
+ * @param[out] timeOffSet - Caller-allocated, caller-owned buffer receiving the offset in seconds as
+ *                          signed decimal text. Examples of valid values are '-25200' (-7 hours,
+ *                          Mountain Standard Time, UTC-7), '-18000' (-5 hours, Eastern Standard Time,
+ *                          UTC-5, the default) and '+25200' (+7 hours, Indonesia Western Time, UTC+7).
+ *                          The buffer must be at least 256 bytes. This interface states neither how
+ *                          many bytes the implementation writes nor whether it writes a terminator, so
+ *                          a caller must bound every read to the 256 bytes it supplied and, where a
+ *                          terminated string is required, must do so itself: zero-filling alone leaves
+ *                          no terminator if the implementation writes the whole buffer, so allocate one
+ *                          byte beyond the size this interface requires and zero that byte before the
+ *                          call. This interface does not specify whether the implementation keeps the
+ *                          pointer after the call returns.
  *
  * @pre @c timeOffSet must point to a caller-allocated buffer of at least 256 bytes. This interface does
  *      not define the behaviour for a null or undersized buffer, so a caller must not rely
@@ -1279,11 +1350,17 @@ INT platform_hal_SetDeviceCodeImageValid(BOOLEAN flag);
  * Returns the operator the unit was programmed for in the factory, which a caller can use to
  * select partner-specific behaviour.
  *
- * @param[out] pValue - Caller-allocated, caller-owned buffer receiving the zero-terminated
- *                      identifier. Possible values are "unknown", "eUnprogrammed", "eComcast",
- *                      "eCharter", "eCox", "eRogers", "eVodafone", "eShaw" and "eVideotron". The
- *                      buffer must be at least 512 bytes. The implementation does not retain the
- *                      pointer after the call returns.
+ * @param[out] pValue - Caller-allocated, caller-owned buffer receiving the identifier as text.
+ *                      Possible values are "unknown", "eUnprogrammed", "eComcast", "eCharter",
+ *                      "eCox", "eRogers", "eVodafone", "eShaw" and "eVideotron". The buffer must be
+ *                      at least 512 bytes. This interface states neither how many bytes the
+ *                      implementation writes nor whether it writes a terminator, so a caller must
+ *                      bound every read to the 512 bytes it supplied and, where a terminated string
+ *                      is required, must do so itself: zero-filling alone leaves no terminator if
+ *                      the implementation writes the whole buffer, so allocate one byte beyond the
+ *                      size this interface requires and zero that byte before the call. This
+ *                      interface does not specify whether the implementation keeps the pointer
+ *                      after the call returns.
  *
  * @pre @c pValue must point to a caller-allocated buffer of at least 512 bytes. This interface does
  *      not define the behaviour for a null or undersized buffer, so a caller must not rely
@@ -1313,10 +1390,16 @@ INT platform_hal_getFactoryPartnerId(CHAR *pValue);
  *
  * Returns the provisioning variant the unit was programmed with in the factory.
  *
- * @param[out] pValue - Caller-allocated, caller-owned buffer receiving the zero-terminated
- *                      variant. Possible values are "unknown", "pc20", "pc20genband", "pc15sip"
- *                      and "pc15mgcp". The buffer must be at least 512 bytes. The implementation
- *                      does not retain the pointer after the call returns.
+ * @param[out] pValue - Caller-allocated, caller-owned buffer receiving the variant as text. Possible
+ *                      values are "unknown", "pc20", "pc20genband", "pc15sip" and "pc15mgcp". The
+ *                      buffer must be at least 512 bytes. This interface states neither how many bytes
+ *                      the implementation writes nor whether it writes a terminator, so a caller must
+ *                      bound every read to the 512 bytes it supplied and, where a terminated string is
+ *                      required, must do so itself: zero-filling alone leaves no terminator if the
+ *                      implementation writes the whole buffer, so allocate one byte beyond the size
+ *                      this interface requires and zero that byte before the call. This interface does
+ *                      not specify whether the implementation keeps the pointer after the call
+ *                      returns.
  *
  * @pre @c pValue must point to a caller-allocated buffer of at least 512 bytes. This interface does
  *      not define the behaviour for a null or undersized buffer, so a caller must not rely
@@ -1347,10 +1430,12 @@ INT platform_hal_getFactoryCmVariant(CHAR *pValue);
  *
  * Records the provisioning variant the unit should report.
  *
- * @param[in] pValue - Caller-allocated, caller-owned buffer holding the zero-terminated variant
- *                     to apply. Accepted values are "unknown", "pc20", "pc20genband", "pc15sip"
- *                     and "pc15mgcp". The string must not exceed 512 bytes. The buffer is read
- *                     during the call only; the implementation does not retain the pointer.
+ * @param[in] pValue - Caller-allocated, caller-owned buffer holding the variant to apply, which the
+ *                     caller must supply as a zero-terminated string; termination is the caller's obligation
+ *                     on the value it passes in. Accepted values are "unknown", "pc20", "pc20genband",
+ *                     "pc15sip" and "pc15mgcp". The string must not exceed 512 bytes. The buffer is read
+ *                     during the call; this interface does not specify whether the implementation keeps the
+ *                     pointer after the call returns.
  *
  * @pre @c pValue must point to a zero-terminated string of no more than 512 bytes. This interface
  *      does not define the behaviour for a null pointer, an over-length string, or a value outside
@@ -1408,8 +1493,8 @@ typedef enum {
 typedef struct _LEDMGMT_PARAMS
 {
 #ifdef FEATURE_RDKB_LED_MANAGER
-    char * led_name;            //!< Name of the LED.
-    char * led_param;           //!< Additional parameters for the LED.
+    char * led_name;            //!< Name of the LED to act on. This interface publishes no set of accepted names, and it establishes nothing about the storage behind this pointer: it states no maximum length, no allocation rule, no guarantee that the text is zero-terminated, and no statement of whether the caller or the implementation owns it. On input to @c platform_hal_setLed a caller must therefore supply its own storage and keep it valid for at least the duration of the call; on output from @c platform_hal_getLed a caller cannot tell whether the implementation writes into storage the caller installed or replaces the pointer with storage of its own, so it must not free the pointer it reads back, must not write through it, and must not assume the text is bounded or terminated. Whether this member may be NULL is also unspecified.
+    char * led_param;           //!< Additional parameters for the LED, in a vendor-defined form this interface does not describe. Length, allocation, termination, ownership and null handling are unspecified exactly as for @c led_name, so a caller must supply and retain its own storage on input and must treat anything it reads back as being of unknown length, unknown termination and unknown ownership. Because no capacity is stated for either member, a caller cannot size a buffer from this header and must obtain any bound it needs from the implementation it runs against.
 #endif
     LED_COLOR  LedColor;        //!< LED color choice from @ref LED_COLOR enum.
     INT  State;                 //!< LED state (0 for Solid, 1 for Blink).
@@ -1434,11 +1519,17 @@ LEDMGMT_PARAMS, *PLEDMGMT_PARAMS;
  * Prepares the LED subsystem for use and tells the caller which configuration file the vendor
  * implementation is driven by.
  *
- * @param[out] config_file_name - Caller-allocated, caller-owned buffer receiving the
- *                               zero-terminated configuration file name including its full path,
- *                               for example /usr/rdk/rdkledmanager/led_config_gb.json. The value
- *                               is vendor specific. The buffer must be at least 128 bytes. The
- *                               implementation does not retain the pointer after the call returns.
+ * @param[out] config_file_name - Caller-allocated, caller-owned buffer receiving the configuration file
+ *                               name including its full path as text, for example
+ *                               /usr/rdk/rdkledmanager/led_config_gb.json. The value is vendor specific.
+ *                               The buffer must be at least 128 bytes. This interface states neither how
+ *                               many bytes the implementation writes nor whether it writes a terminator,
+ *                               so a caller must bound every read to the 128 bytes it supplied and,
+ *                               where a terminated string is required, must do so itself: zero-filling
+ *                               alone leaves no terminator if the implementation writes the whole
+ *                               buffer, so allocate one byte beyond the size this interface requires and
+ *                               zero that byte before the call. This interface does not specify whether
+ *                               the implementation keeps the pointer after the call returns.
  *
  * @pre @c config_file_name must point to a caller-allocated buffer of at least 128 bytes. This interface does
  *      not define the behaviour for a null or undersized buffer, so a caller must not rely
@@ -1474,10 +1565,10 @@ int platform_hal_initLed(char *config_file_name);
  * Sets the LED's colour, its steady or blinking state, and the blink interval, from a single
  * caller-supplied structure.
  *
- * @param[in] pValue - Caller-allocated, caller-owned @c LEDMGMT_PARAMS structure holding the
- *                     configuration to apply. Every member a caller sets is described on
- *                     @c LEDMGMT_PARAMS. The structure is read during the call only; the
- *                     implementation does not retain the pointer.
+ * @param[in] pValue - Caller-allocated, caller-owned @c LEDMGMT_PARAMS structure holding the configuration to apply. Every
+ *                     member a caller sets is described on @c LEDMGMT_PARAMS, including the two @c char* members present when
+ *                     @c FEATURE_RDKB_LED_MANAGER is defined, whose length, allocation, termination and ownership this interface
+ *                     leaves unspecified. The structure is read during the call; this interface does not specify whether the implementation keeps the pointer after the call returns.
  *
  * @pre @c pValue must point to a fully populated @c LEDMGMT_PARAMS structure. This interface does
  *      not define the behaviour for a null pointer or for a member outside its documented range.
@@ -1503,11 +1594,11 @@ INT platform_hal_setLed(PLEDMGMT_PARAMS pValue);
  *
  * Reports the LED's current colour, state and blink interval.
  *
- * @param[out] pValue - Caller-allocated, caller-owned @c LEDMGMT_PARAMS structure that the
- *                      implementation fills with the current configuration. The caller allocates
- *                      the structure itself, so this argument is an out parameter of pointer type
- *                      rather than a pointer to a pointer. The implementation does not retain the
- *                      pointer after the call returns.
+ * @param[out] pValue - Caller-allocated, caller-owned @c LEDMGMT_PARAMS structure that the implementation fills with the
+ *                      current configuration. The caller allocates the structure itself, so this argument is an out parameter
+ *                      of pointer type rather than a pointer to a pointer. Where @c FEATURE_RDKB_LED_MANAGER is defined the
+ *                      structure carries two @c char* members whose storage, length, termination and ownership this interface
+ *                      leaves unspecified; see @c LEDMGMT_PARAMS. This interface does not specify whether the implementation keeps the pointer after the call returns.
  *
  * @pre @c pValue must point to a caller-allocated @c LEDMGMT_PARAMS structure. This interface does
  *      not define the behaviour for a null pointer.
@@ -1599,19 +1690,23 @@ UINT platform_hal_getRPM(UINT fanIndex);
  *      @c fanIndex of 2 or above.
  * @post None. This function reports a reading and changes no platform state.
  *
- * @returns The rotor lock status of the selected fan.
- * @retval  1 if the rotor is locked.
- * @retval  0 if the rotor is not locked.
- * @retval -1 if the value is not applicable, for instance where the platform or the selected fan
- *            provides no rotor lock indication. The caller should treat this as "unknown" and not
- *            as "not locked".
+ * @return The rotor lock indication for the selected fan, as one of the three values this interface
+ *         defines for it: 1 when the rotor is locked, 0 when the rotor is not locked, and -1 when the
+ *         indication is not applicable, for instance where the platform or the selected fan provides
+ *         none. A caller must read -1 as "unknown" rather than as "not locked". This interface defines
+ *         no fourth value and no distinguished value through which this function reports a failed
+ *         query, so a caller cannot separate an unavailable indication from a failure.
+ * @retval 1 The rotor of the selected fan is locked.
+ * @retval 0 The rotor of the selected fan is not locked.
+ * @retval -1 The indication is not applicable - for instance where the platform or the selected
+ *            fan provides none. A caller reads this as "unknown" rather than as "not locked".
  *
  * @execution Synchronous; the calling thread is blocked until the operation completes. This
  *            interface publishes no numeric time bound for this function.
- * @note This function reports discrete status codes of its own rather than the @c RETURN_OK and
- *       @c RETURN_ERR family. The value -1 carries the meaning documented above; this interface
- *       defines no separate error code for this function, so -1 must not be read as a generic
- *       failure even though it shares the numeric value of @c RETURN_ERR.
+ * @note This function reports a reading of its own rather than a code from the @c RETURN_OK and @c RETURN_ERR
+ *       family, so its result is documented as a value domain and not as a status list. The value -1 carries
+ *       the meaning documented above; this interface defines no separate error code for this function, so -1
+ *       must not be read as a generic failure even though it shares the numeric value of @c RETURN_ERR.
  * @note Not thread safe. A caller must serialise this call against every other Platform HAL
  *       call it makes.
  * @see platform_hal_getRPM
@@ -1731,12 +1826,12 @@ typedef struct _FAN_PLATFORM_CONFIG
  * the platform's fans are driven. A vendor implementation may also start whatever internal threads
  * it needs at this point.
  *
- * @param[out] pThermalPlatformConfig - Caller-allocated, caller-owned
- *                                      @c THERMAL_PLATFORM_CONFIG structure that the
- *                                      implementation fills with the platform's thermal
- *                                      configuration. Each member is described on
- *                                      @c THERMAL_PLATFORM_CONFIG. The implementation does not
- *                                      retain the pointer after the call returns.
+ * @param[out] pThermalPlatformConfig - Caller-allocated,
+ *                                      caller-owned @c THERMAL_PLATFORM_CONFIG structure that the
+ *                                      implementation fills with the platform's thermal configuration.
+ *                                      Each member is described on @c THERMAL_PLATFORM_CONFIG. This
+ *                                      interface does not specify whether the implementation keeps the
+ *                                      pointer after the call returns.
  *
  * @pre @c pThermalPlatformConfig must point to a caller-allocated @c THERMAL_PLATFORM_CONFIG
  *      structure. This is one of the initialization functions the client is expected to call
@@ -1767,12 +1862,12 @@ INT platform_hal_initThermal(THERMAL_PLATFORM_CONFIG *pThermalPlatformConfig);
  * Fills a caller-supplied structure with the platform's default fan thresholds and timings, which
  * lets a caller recover the defaults without restarting the thermal subsystem.
  *
- * @param[out] pThermalPlatformConfig - Caller-allocated, caller-owned
- *                                      @c THERMAL_PLATFORM_CONFIG structure that the
- *                                      implementation fills with the default thermal
- *                                      configuration. Each member is described on
- *                                      @c THERMAL_PLATFORM_CONFIG. The implementation does not
- *                                      retain the pointer after the call returns.
+ * @param[out] pThermalPlatformConfig - Caller-allocated,
+ *                                      caller-owned @c THERMAL_PLATFORM_CONFIG structure that the
+ *                                      implementation fills with the default thermal configuration.
+ *                                      Each member is described on @c THERMAL_PLATFORM_CONFIG. This
+ *                                      interface does not specify whether the implementation keeps
+ *                                      the pointer after the call returns.
  *
  * @pre @c pThermalPlatformConfig must point to a caller-allocated @c THERMAL_PLATFORM_CONFIG
  *      structure. This interface does not define whether this function may be called before
@@ -1833,10 +1928,10 @@ typedef enum {
  *                       inclusive, so @c fanIndex must be less than 2.
  * @param[in] fanSpeed - Desired speed, passed by value. The value must be one of the
  *                       @c FAN_SPEED enumerators.
- * @param[out] pErrReason - Caller-allocated, caller-owned @c FAN_ERR that the implementation fills
- *                          with the reason the request could not be honoured. The value is one of
- *                          the @c FAN_ERR enumerators. The implementation does not retain the
- *                          pointer after the call returns.
+ * @param[out] pErrReason - Caller-allocated, caller-owned @c FAN_ERR that the
+ *                          implementation fills with the reason the request could not be honoured. The
+ *                          value is one of the @c FAN_ERR enumerators. This interface does not specify
+ *                          whether the implementation keeps the pointer after the call returns.
  *
  * @pre @c pErrReason must point to a caller-allocated @c FAN_ERR. This interface does not define
  *      the behaviour for a null pointer, a @c fanIndex of 2 or above, or a @c fanSpeed outside the
@@ -1873,10 +1968,10 @@ INT platform_hal_setFanSpeed(UINT fanIndex, FAN_SPEED fanSpeed, FAN_ERR *pErrRea
  * Reports the platform's temperature, which a caller uses to decide whether thermal mitigation is
  * needed.
  *
- * @param[out] pTemp - Caller-allocated, caller-owned @c INT receiving the temperature in degrees
- *                     Celsius. The valid range is 0 to 100 as defined by the platform's
- *                     requirements. The implementation does not retain the pointer after the call
- *                     returns.
+ * @param[out] pTemp - Caller-allocated, caller-owned @c INT receiving the
+ *                     temperature in degrees Celsius. The valid range is 0 to 100 as defined
+ *                     by the platform's requirements. This interface does not specify whether
+ *                     the implementation keeps the pointer after the call returns.
  *
  * @pre @c pTemp must point to a caller-allocated buffer of at least one INT. This interface does
  *      not define the behaviour for a null or undersized buffer, so a caller must not rely
@@ -1909,9 +2004,9 @@ INT platform_hal_getFanTemperature(INT *pTemp);
  *
  * Reports the current drawn at the platform's power input.
  *
- * @param[out] pValue - Caller-allocated, caller-owned @c INT receiving the input current in
- *                      milli-amperes. The valid range is 0 to 20000 mA. The implementation does
- *                      not retain the pointer after the call returns.
+ * @param[out] pValue - Caller-allocated, caller-owned @c INT receiving the input
+ *                      current in milli-amperes. The valid range is 0 to 20000 mA. This interface does
+ *                      not specify whether the implementation keeps the pointer after the call returns.
  *
  * @pre @c pValue must point to a caller-allocated buffer of at least one INT. This interface does
  *      not define the behaviour for a null or undersized buffer, so a caller must not rely
@@ -1944,9 +2039,9 @@ INT platform_hal_getInputCurrent(INT *pValue);
  *
  * Reports the power consumed at the platform's power input.
  *
- * @param[out] pValue - Caller-allocated, caller-owned @c INT receiving the input power in
- *                      milli-watts. The valid range is 0 to 20000 mW. The implementation does not
- *                      retain the pointer after the call returns.
+ * @param[out] pValue - Caller-allocated, caller-owned @c INT receiving the input
+ *                      power in milli-watts. The valid range is 0 to 20000 mW. This interface does not
+ *                      specify whether the implementation keeps the pointer after the call returns.
  *
  * @pre @c pValue must point to a caller-allocated buffer of at least one INT. This interface does
  *      not define the behaviour for a null or undersized buffer, so a caller must not rely
@@ -1983,9 +2078,9 @@ INT platform_hal_getInputPower(INT *pValue);
  * @param[in] radioIndex - Index of the radio to query, passed by value. The valid values are 0 for
  *                         the 2.4GHz radio, 1 for the 5GHz low-band radio and 2 for the 5GHz
  *                         high-band radio.
- * @param[out] pValue - Caller-allocated, caller-owned @c INT receiving the temperature in degrees
- *                      Celsius. The valid range is 0 to 100. The implementation does not retain
- *                      the pointer after the call returns.
+ * @param[out] pValue - Caller-allocated, caller-owned @c INT receiving the
+ *                      temperature in degrees Celsius. The valid range is 0 to 100. This interface does
+ *                      not specify whether the implementation keeps the pointer after the call returns.
  *
  * @pre @c pValue must point to a caller-allocated buffer of at least one INT. This interface does
  *      not define the behaviour for a null or undersized buffer, so a caller must not rely
@@ -2024,9 +2119,9 @@ INT platform_hal_getRadioTemperature(INT radioIndex, INT *pValue);
  *
  * @param[in] radioIndex - Index of the radio to query, passed by value. The valid values are 0 for
  *                         the 2.4GHz radio and 1 for the 5GHz radio.
- * @param[out] pValue - Caller-allocated, caller-owned @c INT receiving the ECO mode status, where
- *                      0 means ECO mode is disabled and 1 means it is enabled. The implementation
- *                      does not retain the pointer after the call returns.
+ * @param[out] pValue - Caller-allocated, caller-owned @c INT receiving the ECO mode
+ *                      status, where 0 means ECO mode is disabled and 1 means it is enabled. This interface
+ *                      does not specify whether the implementation keeps the pointer after the call returns.
  *
  * @pre @c pValue must point to a caller-allocated buffer of at least one INT. This interface does
  *      not define the behaviour for a null or undersized buffer, so a caller must not rely
@@ -2063,11 +2158,11 @@ INT platform_hal_getEcoModeStatus(INT radioIndex, INT *pValue);
  *
  * Controls whether the platform acts on an SNMP reboot request while onboarding is in progress.
  *
- * @param[in] pValue - Caller-allocated, caller-owned buffer holding the zero-terminated setting to
- *                     apply. Accepted values are "disable" and "enable", matched without regard to
- *                     case. The string must not exceed 8 bytes including its terminator. The
- *                     buffer is read during the call only; the implementation does not retain the
- *                     pointer.
+ * @param[in] pValue - Caller-allocated, caller-owned buffer holding the
+ *                     zero-terminated setting to apply. Accepted values are "disable" and "enable",
+ *                     matched without regard to case. The string must not exceed 8 bytes including
+ *                     its terminator. The buffer is read during the call; this interface does not
+ *                     specify whether the implementation keeps the pointer after the call returns.
  *
  * @pre @c pValue must point to a zero-terminated string of no more than 8 bytes. This interface
  *      does not define the behaviour for a null pointer, an over-length string, or a value outside
@@ -2099,9 +2194,9 @@ INT platform_hal_SetSNMPOnboardRebootEnable(CHAR *pValue);
  *                      kinds together, including MoCA, Ethernet and Wi-Fi. The valid range is 0
  *                      to MaxEthPort-1, where MaxEthPort is platform specific and is not
  *                      published by this interface.
- * @param[out] pFlag - Caller-allocated, caller-owned @c BOOLEAN receiving the result, where
- *                     @c TRUE means MACsec is enabled and @c FALSE means it is not. The implementation does
- *                     not retain the pointer after the call returns.
+ * @param[out] pFlag - Caller-allocated, caller-owned @c BOOLEAN receiving the result,
+ *                     where @c TRUE means MACsec is enabled and @c FALSE means it is not. This interface
+ *                     does not specify whether the implementation keeps the pointer after the call returns.
  *
  * @pre @c pFlag must point to a caller-allocated buffer of at least one BOOLEAN. This interface does
  *      not define the behaviour for a null or undersized buffer, so a caller must not rely
@@ -2171,9 +2266,9 @@ INT platform_hal_SetMACsecEnable(INT ethPort, BOOLEAN Flag);
  *                      kinds together, including MoCA, Ethernet and Wi-Fi. The valid range is 0
  *                      to MaxEthPort-1, where MaxEthPort is platform specific and is not
  *                      published by this interface.
- * @param[out] pFlag - Caller-allocated, caller-owned @c BOOLEAN receiving the result, where
- *                     @c TRUE means MACsec is operational and @c FALSE means it is not. The implementation does
- *                     not retain the pointer after the call returns.
+ * @param[out] pFlag - Caller-allocated, caller-owned @c BOOLEAN receiving the result,
+ *                     where @c TRUE means MACsec is operational and @c FALSE means it is not. This interface
+ *                     does not specify whether the implementation keeps the pointer after the call returns.
  *
  * @pre @c pFlag must point to a caller-allocated buffer of at least one BOOLEAN. This interface does
  *      not define the behaviour for a null or undersized buffer, so a caller must not rely
@@ -2288,7 +2383,7 @@ INT platform_hal_StopMACsec(INT ethPort);
  *                    discard the output, and retry or report the failure; no more specific
  *                    cause is reported.
  *
- * @execution Synchronous.
+ * @execution Synchronous; the calling thread is blocked until the operation completes, the allocation below included. This interface publishes no numeric time bound for it.
  * @note This function is the one documented exception to the memory model described in
  *       @ref platform_hal "the Platform HAL runtime contract". Here the HAL allocates the array
  *       of @c PLAT_PROC_MEM_INFO and returns it through @c ppinfo, rather than filling a buffer
@@ -2319,11 +2414,23 @@ INT platform_hal_GetMemoryPaths(RDK_CPUS index, PPLAT_PROC_MEM_INFO *ppinfo);
  *
  * The structure represents a linked list, where each node contains 
  * an option and its corresponding value.
+ *
+ * A caller meets this type only as the head of a list produced by
+ * @c platform_hal_GetDhcpv4_Options or @c platform_hal_GetDhcpv6_Options, and the numbering space
+ * of @c dhcp_opt follows whichever of the two produced the list: a node does not record the
+ * protocol it belongs to. What this interface does not establish about such a list is as
+ * important to a caller as what it does. It does not state which side allocated the nodes or the
+ * values they point at, it declares no function that releases either, and neither the end of the
+ * list nor the extent of a value is fixed by the members below - so this interface specifies no
+ * safe way to traverse a returned list and no way to release it. A caller settles the termination
+ * rule, the value representation and the release rule with the implementation it runs against
+ * before it dereferences, copies or frees anything reached through the head pointer. The three
+ * members are documented on those terms.
  */
 typedef struct dhcp_opt_list {
-    int dhcp_opt; /*!< The DHCP option code or identifier. The DHCP option code value can be DHCPv4 or DHCPv6 Possible values. DHCPv6 Options Possible values are "DHCPV6_OPT_82", "DHCPV6_OPT_23", "DHCPV6_OPT_95", "DHCPV6_OPT_24", "DHCPV6_OPT_83", "DHCPV6_OPT_17", "DHCPV6_OPT_31", "DHCPV6_OPT_15", "DHCPV6_OPT_16", "DHCPV6_OPT_20" . DHCPv4 Options Possible values are "DHCPV4_OPT_42", "DHCPV4_OPT_43", "DHCPV4_OPT_58", "DHCPV4_OPT_59", "DHCPV4_OPT_60", "DHCPV4_OPT_61", "DHCPV4_OPT_100", "DHCPV4_OPT_122", "DHCPV4_OPT_125", "DHCPV4_OPT_242", "DHCPV4_OPT_243", "DHCPV4_OPT_END" */
-    char * dhcp_opt_val; /*!< Pointer to the value associated with the DHCP option code*/
-    struct dhcp_opt_list * next; /*!< Pointer to the next DHCP option in the list */
+    int dhcp_opt; /*!< DHCP option code carried by this node, held as a plain @c int. The header defines a named constant for each code this interface names: @c DHCPV6_OPT_3, @c DHCPV6_OPT_5, @c DHCPV6_OPT_15, @c DHCPV6_OPT_16, @c DHCPV6_OPT_17, @c DHCPV6_OPT_20, @c DHCPV6_OPT_22, @c DHCPV6_OPT_23, @c DHCPV6_OPT_24, @c DHCPV6_OPT_25, @c DHCPV6_OPT_31, @c DHCPV6_OPT_64, @c DHCPV6_OPT_82, @c DHCPV6_OPT_83 and @c DHCPV6_OPT_95 on the DHCPv6 side, and @c DHCPV4_OPT_2, @c DHCPV4_OPT_42, @c DHCPV4_OPT_43, @c DHCPV4_OPT_58, @c DHCPV4_OPT_59, @c DHCPV4_OPT_60, @c DHCPV4_OPT_61, @c DHCPV4_OPT_100, @c DHCPV4_OPT_122, @c DHCPV4_OPT_125, @c DHCPV4_OPT_242, @c DHCPV4_OPT_243 and @c DHCPV4_OPT_END on the DHCPv4 side. Each constant equals the registered code of the option its own comment names; the DHCPv4 codes are those defined by RFC 2132 and the IANA registry that continues it, so the meaning of a code is fixed there and not by this interface. @c DHCPV4_OPT_END is the RFC 2132 End option, code 255, which the macro's comment describes as the value used to check whether an option is valid; this interface does not state that a node carrying it ends a list. Neither is the member restricted to the constants above: each protocol's code space is larger than the set named here, so a caller must be prepared for a code it has no constant for and must not read an unrecognised value as corruption. */
+    char * dhcp_opt_val; /*!< Pointer to the value associated with the DHCP option code. This interface states neither how long that value is nor how a caller determines its length: the member is a bare @c char pointer, no length travels beside it, the option code does not fix a length for every option, and nothing here establishes that the bytes are NUL-terminated text rather than a counted binary value - several of the options named above carry binary payloads. The readable extent of the value is therefore unspecified, as is whether the pointer may be NULL for an option that carries no value. A caller must not dereference it, and must not copy or print it with an unbounded string operation, until it has established the representation and the length rule with the implementation it runs against. Which side allocated the value and which side releases it are equally unstated; see the description above. */
+    struct dhcp_opt_list * next; /*!< Pointer to the next DHCP option in the list. This interface does not state how the list ends: it does not say that the last node holds NULL here, and it publishes no node count, no length accessor and no other terminator, so a caller cannot derive a stopping condition for a traversal from this header alone. Whether the nodes were allocated by the implementation or by the caller is not stated either, and no function declared here releases them; see the description above. */
 } dhcp_opt_list;
 
 /**
@@ -2343,16 +2450,21 @@ typedef struct dhcp_opt_list {
  *
  * @param[out] req_opt_list - Address of a caller-held @c dhcp_opt_list pointer. The
  *                            implementation builds the list of requested DHCPv4 options and writes
- *                            its head here. Option codes are drawn from the @c DHCPV4_OPT_
- *                            constants.
+ *                            its head here. The codes it carries are DHCPv4 codes, for which the
+ *                            header defines the @c DHCPV4_OPT_ constants; @c dhcp_opt_list states
+ *                            what the member does and does not restrict.
  * @param[out] send_opt_list - Address of a caller-held @c dhcp_opt_list pointer. The
  *                             implementation builds the list of DHCPv4 options to be sent and
- *                             writes its head here.
+ *                             writes its head here, on the same terms as @c req_opt_list.
  *
  * @pre Both arguments must be addresses of valid pointer variables. This interface does not define
  *      the behaviour for a null argument.
  * @post On success each argument refers to a linked list of @c dhcp_opt_list nodes, which may be
- *       empty. On failure this interface does not define whether either pointer was written.
+ *       empty. This interface does not state how such a list ends, so a caller cannot conclude
+ *       from a successful return that the last node holds a null @c next, and it does not state
+ *       the extent of a node's @c dhcp_opt_val or whether that pointer may be null. On failure it
+ *       does not define whether either pointer was written, so a caller must not read or free
+ *       either one.
  *
  * @returns The status of the operation.
  * @retval RETURN_OK if successful.
@@ -2362,8 +2474,14 @@ typedef struct dhcp_opt_list {
  *
  * @execution Synchronous; the calling thread is blocked until the operation completes. This
  *            interface publishes no numeric time bound for this function.
- * @warning This interface does not state which side releases the list nodes, and it declares no
- *          matching free function, so that ownership is unspecified.
+ * @warning This interface does not state which side releases the list nodes or the values they
+ *          point at, and it declares no matching free function, so a caller can neither release
+ *          the result safely nor assume the implementation will. Nor does it state how a list
+ *          ends, whether a node's value pointer may be null, or how many bytes a value holds, so
+ *          it specifies no safe traversal of the result either: a caller settles the termination
+ *          rule, the value representation and the release rule with the implementation it runs
+ *          against before it reads or frees anything reached through these two pointers.
+ *          @c dhcp_opt_list documents each member on those terms.
  * @note Not thread safe. A caller must serialise this call against every other Platform HAL
  *       call it makes.
  * @see platform_hal_GetDhcpv6_Options
@@ -2379,16 +2497,21 @@ INT platform_hal_GetDhcpv4_Options(dhcp_opt_list **req_opt_list, dhcp_opt_list *
  *
  * @param[out] req_opt_list - Address of a caller-held @c dhcp_opt_list pointer. The
  *                            implementation builds the list of requested DHCPv6 options and writes
- *                            its head here. Option codes are drawn from the @c DHCPV6_OPT_
- *                            constants.
+ *                            its head here. The codes it carries are DHCPv6 codes, for which the
+ *                            header defines the @c DHCPV6_OPT_ constants; @c dhcp_opt_list states
+ *                            what the member does and does not restrict.
  * @param[out] send_opt_list - Address of a caller-held @c dhcp_opt_list pointer. The
  *                             implementation builds the list of DHCPv6 options to be sent and
- *                             writes its head here.
+ *                             writes its head here, on the same terms as @c req_opt_list.
  *
  * @pre Both arguments must be addresses of valid pointer variables. This interface does not define
  *      the behaviour for a null argument.
  * @post On success each argument refers to a linked list of @c dhcp_opt_list nodes, which may be
- *       empty. On failure this interface does not define whether either pointer was written.
+ *       empty. This interface does not state how such a list ends, so a caller cannot conclude
+ *       from a successful return that the last node holds a null @c next, and it does not state
+ *       the extent of a node's @c dhcp_opt_val or whether that pointer may be null. On failure it
+ *       does not define whether either pointer was written, so a caller must not read or free
+ *       either one.
  *
  * @returns The status of the operation.
  * @retval RETURN_OK if successful.
@@ -2398,8 +2521,14 @@ INT platform_hal_GetDhcpv4_Options(dhcp_opt_list **req_opt_list, dhcp_opt_list *
  *
  * @execution Synchronous; the calling thread is blocked until the operation completes. This
  *            interface publishes no numeric time bound for this function.
- * @warning This interface does not state which side releases the list nodes, and it declares no
- *          matching free function, so that ownership is unspecified.
+ * @warning This interface does not state which side releases the list nodes or the values they
+ *          point at, and it declares no matching free function, so a caller can neither release
+ *          the result safely nor assume the implementation will. Nor does it state how a list
+ *          ends, whether a node's value pointer may be null, or how many bytes a value holds, so
+ *          it specifies no safe traversal of the result either: a caller settles the termination
+ *          rule, the value representation and the release rule with the implementation it runs
+ *          against before it reads or frees anything reached through these two pointers.
+ *          @c dhcp_opt_list documents each member on those terms.
  * @note Not thread safe. A caller must serialise this call against every other Platform HAL
  *       call it makes.
  * @see platform_hal_GetDhcpv4_Options
@@ -2453,9 +2582,9 @@ typedef  enum {
  * follow each change.
  *
  * @param[in] pState - Caller-allocated, caller-owned @c PSM_STATE holding the state to apply. The
- *                     value must be one of the @c PSM_STATE enumerators. Despite being a pointer,
- *                     this is an input: the implementation reads the state through it and does not
- *                     write it back, and does not retain the pointer after the call returns.
+ *                     value must be one of the @c PSM_STATE enumerators. Despite being a pointer, this is an input:
+ *                     the implementation reads the state through it and does not write it back. This interface does
+ *                     not specify whether the implementation keeps the pointer after the call returns.
  *
  * @pre @c pState must point to a @c PSM_STATE holding one of the enumerated values. This interface
  *      does not define the behaviour for a null pointer or an unenumerated value.
@@ -2483,9 +2612,15 @@ INT platform_hal_SetLowPowerModeState(PPSM_STATE pState);
  * Returns the address of the Cable Modem Termination System serving this device, which identifies
  * the head-end the modem is registered with.
  *
- * @param[out] pValue - Caller-allocated, caller-owned buffer receiving the zero-terminated CMTS
- *                      MAC address. The buffer must be at least 100 bytes. The implementation does
- *                      not retain the pointer after the call returns.
+ * @param[out] pValue - Caller-allocated, caller-owned buffer receiving the CMTS MAC address as text.
+ *                      The buffer must be at least 100 bytes. This interface states neither how many
+ *                      bytes the implementation writes nor whether it writes a terminator, so a caller
+ *                      must bound every read to the 100 bytes it supplied and, where a terminated
+ *                      string is required, must do so itself: zero-filling alone leaves no terminator
+ *                      if the implementation writes the whole buffer, so allocate one byte beyond the
+ *                      size this interface requires and zero that byte before the call. This interface
+ *                      does not specify whether the implementation keeps the pointer after the call
+ *                      returns.
  *
  * @pre @c pValue must point to a caller-allocated buffer of at least 100 bytes. This interface does
  *      not define the behaviour for a null or undersized buffer, so a caller must not rely
@@ -2552,9 +2687,9 @@ typedef enum {
  * reads them after @c platform_hal_getDscpClientList has returned successfully.
  */
 typedef struct Traffic_client {
-    char mac[18];    /*!< The client mac e.g. 00:AA:BB:CC:DD:EE */
-    ULONG rxBytes;   /*!< The total number of bytes received by the client, Possible values from 0 to 2^64-1.*/
-    ULONG txBytes;   /*!< The total number of bytes transmitted by the client,  Possible values from 0 to 2^64-1. */
+    char mac[18];    /*!< The client's MAC address as text in colon-separated upper-case hexadecimal form, for example "00:AA:BB:CC:DD:EE". The field is 18 bytes, which is the 17 characters of that form plus one further byte, so it has no room for any longer representation. This interface states neither how many of those bytes the implementation writes nor whether it writes a terminator, so a caller must bound every read of this field to its 18 bytes and must not rely on a terminator to find the end of the address. */
+    ULONG rxBytes;   /*!< The total number of bytes received by the client on this DSCP value since counting started. The domain is that of @c ULONG, which this header defines as @c unsigned long, so its width follows the build target rather than being fixed: 0 to 4,294,967,295 (2^32-1) where @c unsigned long is 32 bits, as it is on the 32-bit RDK-B targets, and 0 to 18,446,744,073,709,551,615 (2^64-1) where it is 64 bits. A caller must derive its own limit from @c unsigned long on the build target, for example from @c ULONG_MAX, rather than assume 64 bits, and on a 32-bit build must sample often enough to keep up with the much shorter span. This interface does not define whether the count wraps or stops at that maximum. */
+    ULONG txBytes;   /*!< The total number of bytes transmitted by the client on this DSCP value since counting started. Its domain, its target-dependent width and its undefined behaviour at the maximum are those described for @c rxBytes. */
 } Traffic_client_t, *pTraffic_client_t;
 
 /**
@@ -2566,9 +2701,9 @@ typedef struct Traffic_client {
  * first @c numClients entries of @c Client hold meaningful data.
  */
 typedef struct DSCP_Element {
-    UINT dscp_value;                /*!< DSCP value. Maximum value for dcspvalue is 65,535 range [ 0- 65,534]*/
-    UINT numClients;                /*!< Number of clients associated with the DSCP value. Maximum value for numClients is 255 range [ 0-255]*/
-    Traffic_client_t Client[256];   /*!< Traffic_client_t structure is used to hold up to 256 traffic clients for the specified DSCP value in an array. */
+    UINT dscp_value;                /*!< The DSCP value these counters were accumulated for. DSCP is a six-bit field, so the value lies in the range 0 to 63 inclusive, as this header also states for the @c dscp_value member of @c hal_network_params_t. The @c UINT type is wider than the field it carries; no value above 63 is meaningful, and this interface does not define what a larger value would mean. */
+    UINT numClients;                /*!< The number of leading entries of @c Client the HAL populated. It is a count, not an index: it lies in the range 0 to 256 inclusive, 256 being the capacity of @c Client, and 0 means no client was observed on this DSCP value. The valid indices into @c Client are therefore 0 to @c numClients-1, and at most 0 to 255. */
+    Traffic_client_t Client[256];   /*!< Fixed-capacity array of the clients observed on this DSCP value, holding at most 256 entries and indexed 0 to 255. The caller allocates it as part of this structure; the HAL fills the first @c numClients entries, and the remaining entries hold no meaningful data. */
 } DSCP_Element_t, *pDSCP_Element_t;
 
 /**
@@ -2581,8 +2716,8 @@ typedef struct DSCP_Element {
  * data.
  */
 typedef struct DSCP_list {
-    UINT numElements;                  /*!< Number of DSCP elements in the list. Maximum value for numElements is 64 range [ 0-63] */
-    DSCP_Element_t DSCP_Element[64];   /*!< The DSCP_Element_t structure is used to hold up to 64 DSCP elements in an array. */
+    UINT numElements;                  /*!< The number of leading entries of @c DSCP_Element the HAL populated. It is a count, not an index: it lies in the range 0 to 64 inclusive, 64 being the capacity of @c DSCP_Element, and 0 means no DSCP value carried traffic. The valid indices into @c DSCP_Element are therefore 0 to @c numElements-1, and at most 0 to 63. */
+    DSCP_Element_t DSCP_Element[64];   /*!< Fixed-capacity array of the DSCP values counted on this WAN interface, holding at most 64 entries and indexed 0 to 63. The caller allocates it as part of this structure; the HAL fills the first @c numElements entries, and the remaining entries hold no meaningful data. */
 } DSCP_list_t, *pDSCP_list_t;
 
 /**
@@ -2604,11 +2739,13 @@ typedef struct DSCP_list {
  *                            be one of the @c WAN_INTERFACE enumerators.
  * @param[in] cmd - Whether to start or stop counting, passed by value. The value must be one of
  *                  the @c TRAFFIC_CNT_COMMAND enumerators.
- * @param[in] pDscpVals - Caller-allocated, caller-owned buffer holding a zero-terminated,
- *                        comma-separated list of base-10 DSCP values, for example "10,0". Each
- *                        value lies in the range 0 to 65534. The string must not exceed 195 bytes.
- *                        Pass NULL to apply the request to all DSCP values. The buffer is read
- *                        during the call only; the implementation does not retain the pointer.
+ * @param[in] pDscpVals - Caller-allocated, caller-owned buffer holding a comma-separated list of
+ *                        base-10 DSCP values, for example "10,0", which the caller must supply as a
+ *                        zero-terminated string; termination is the caller's obligation on the value it
+ *                        passes in. DSCP is a six-bit field, so each value lies in the range 0 to 63
+ *                        inclusive. The string must not exceed 195 bytes. Pass NULL to apply the request to
+ *                        all DSCP values. The buffer is read during the call; this interface does not specify
+ *                        whether the implementation keeps the pointer after the call returns.
  *
  * @pre @c pDscpVals must be either NULL or a zero-terminated string of no more than 195 bytes.
  *      This interface does not define the behaviour for an over-length string, a malformed list,
@@ -2670,11 +2807,11 @@ INT platform_hal_resetDscpCounts(WAN_INTERFACE interfaceType);
  *
  * @param[in] interfaceType - WAN interface to report on, passed by value. The value must be one of
  *                            the @c WAN_INTERFACE enumerators.
- * @param[out] pDSCP_List - Caller-allocated, caller-owned @c DSCP_list_t structure that the
- *                          implementation fills. The caller allocates the whole structure,
- *                          including its fixed-capacity arrays, so this argument is an out
- *                          parameter of pointer type rather than a pointer to a pointer. The
- *                          implementation does not retain the pointer after the call returns.
+ * @param[out] pDSCP_List - Caller-allocated, caller-owned @c DSCP_list_t structure
+ *                          that the implementation fills. The caller allocates the whole structure,
+ *                          including its fixed-capacity arrays, so this argument is an out parameter of
+ *                          pointer type rather than a pointer to a pointer. This interface does not specify
+ *                          whether the implementation keeps the pointer after the call returns.
  *
  * @pre @c pDSCP_List must point to a caller-allocated @c DSCP_list_t. This interface does not
  *      define the behaviour for a null pointer or an @c interfaceType outside its enumeration.
@@ -2705,10 +2842,15 @@ INT platform_hal_getDscpClientList(WAN_INTERFACE interfaceType , pDSCP_list_t pD
  * Returns the kernel's bogomips figure for the processor as decimal text rather than as a number,
  * so a caller that needs an integer must convert it.
  *
- * @param[out] cpuSpeed - Caller-allocated, caller-owned buffer receiving the zero-terminated
- *                        speed value. The value is vendor specific and lies in the range 0 to
- *                        (2^64)-1 inclusive. The buffer must be at least 64 bytes. The
- *                        implementation does not retain the pointer after the call returns.
+ * @param[out] cpuSpeed - Caller-allocated, caller-owned buffer receiving the speed value as decimal text.
+ *                        The value is vendor specific and lies in the range 0 to (2^64)-1 inclusive. The
+ *                        buffer must be at least 64 bytes. This interface states neither how many bytes
+ *                        the implementation writes nor whether it writes a terminator, so a caller must
+ *                        bound every read to the 64 bytes it supplied and, where a terminated string is
+ *                        required, must do so itself: zero-filling alone leaves no terminator if the
+ *                        implementation writes the whole buffer, so allocate one byte beyond the size
+ *                        this interface requires and zero that byte before the call. This interface does
+ *                        not specify whether the implementation keeps the pointer after the call returns.
  *
  * @pre @c cpuSpeed must point to a caller-allocated buffer of at least 64 bytes. This interface does
  *      not define the behaviour for a null or undersized buffer, so a caller must not rely
@@ -2757,8 +2899,11 @@ typedef  enum {
  * @struct _FW_BANK_INFO
  * @brief Firmware image name and trial-boot state for one firmware bank.
  *
- * The output structure of @c platform_hal_GetFirmwareBankInfo. The caller allocates it and
- * the HAL fills both fields as zero-terminated strings.
+ * The output structure of @c platform_hal_GetFirmwareBankInfo. The caller allocates it and the
+ * implementation fills both fields with text. This interface states neither how many bytes of
+ * either field the implementation writes nor whether it writes a terminator, so a caller must
+ * bound its reads to @c FW_NAME_MAX_LEN bytes for @c fw_name and @c FW_STATE_MAX_LEN bytes for
+ * @c fw_state, and must not rely on a terminator to find the end of either value.
  */
 typedef  struct _FW_BANK_INFO
 {
@@ -2784,15 +2929,18 @@ FW_BANK_INFO, *PFW_BANK_INFO;
  *
  * @param[in] bankIndex - Bank to report on, passed by value. The value must be one of the
  *                        @c FW_BANK enumerators.
- * @param[out] pFW_Bankinfo - Caller-allocated, caller-owned @c FW_BANK_INFO structure that the
- *                            implementation fills with the image name and state. The caller
- *                            allocates the structure itself, so this argument is an out parameter
- *                            of pointer type rather than a pointer to a pointer. The
- *                            implementation does not retain the pointer after the call returns.
+ * @param[out] pFW_Bankinfo - Caller-allocated, caller-owned @c FW_BANK_INFO
+ *                            structure that the implementation fills with the image name and state. The
+ *                            caller allocates the structure itself, so this argument is an out parameter
+ *                            of pointer type rather than a pointer to a pointer. This interface does not
+ *                            specify whether the implementation keeps the pointer after the call returns.
  *
  * @pre @c pFW_Bankinfo must point to a caller-allocated @c FW_BANK_INFO. This interface does not
  *      define the behaviour for a null pointer or a @c bankIndex outside its enumeration.
- * @post On success the output holds the image name and state as zero-terminated strings. On failure this interface does not define the
+ * @post On success the output holds the image name in @c fw_name and the trial-boot state in
+ *       @c fw_state, each as text of unstated length within its field; this interface does not state
+ *       whether either field is terminated, so a caller must bound its reads to @c FW_NAME_MAX_LEN
+ *       and @c FW_STATE_MAX_LEN bytes respectively. On failure this interface does not define the
  *       output's contents, so a caller must discard them.
  *
  * @returns The status of the operation.
@@ -2853,15 +3001,17 @@ INTF_STATS, *PINTF_STATS;
  *
  * Reports the traffic counters for one interface, counting LAN-to-WAN and WAN-to-LAN traffic only.
  *
- * @param[in] ifname - Caller-allocated, caller-owned buffer holding the zero-terminated interface
- *                     name. Interface names are platform specific; 'ifconfig -a' lists those a
- *                     given platform provides. The buffer is read during the call only and is
- *                     declared const, so the implementation neither modifies nor retains it.
- * @param[out] pIntfStats - Caller-allocated, caller-owned @c INTF_STATS structure that the
- *                          implementation fills with the counters. The caller allocates the
- *                          structure itself, so this argument is an out parameter of pointer type
- *                          rather than a pointer to a pointer. The implementation does not retain
- *                          the pointer after the call returns.
+ * @param[in] ifname - Caller-allocated, caller-owned buffer holding the interface name, which the
+ *                     caller must supply as a zero-terminated string; termination is the caller's obligation
+ *                     on the value it passes in. Interface names are platform specific; 'ifconfig -a' lists
+ *                     those a given platform provides. The buffer is read during the call and is declared
+ *                     const, so the implementation does not modify it; this interface does not specify
+ *                     whether it keeps the pointer after the call returns.
+ * @param[out] pIntfStats - Caller-allocated, caller-owned @c INTF_STATS
+ *                          structure that the implementation fills with the counters. The caller
+ *                          allocates the structure itself, so this argument is an out parameter of
+ *                          pointer type rather than a pointer to a pointer. This interface does not
+ *                          specify whether the implementation keeps the pointer after the call returns.
  *
  * @pre @c ifname must name an interface that exists on the platform and @c pIntfStats must point
  *      to a caller-allocated @c INTF_STATS. This interface does not define the behaviour for a
@@ -2890,9 +3040,15 @@ INT platform_hal_GetInterfaceStats(const char *ifname,PINTF_STATS pIntfStats);
  *
  * Returns the username the platform authenticates its PPP session with.
  *
- * @param[out] pUserName - Caller-allocated, caller-owned buffer receiving the zero-terminated
- *                      username. The implementation does not retain the pointer after the call
- *                      returns.
+ * @param[out] pUserName - Caller-allocated, caller-owned buffer receiving the username as text.
+ *                      This interface states neither how many bytes the implementation writes nor
+ *                      whether it writes a terminator, so a caller must bound every read to the
+ *                      @c maxSize bytes it reported and, where a terminated string is required,
+ *                      must do so itself: zero-filling alone leaves no terminator if the
+ *                      implementation writes the whole buffer, so report a @c maxSize one byte
+ *                      short of the allocation and zero the byte beyond it before the call. This
+ *                      interface does not specify whether the implementation keeps the pointer
+ *                      after the call returns.
  * @param[in] maxSize - Size in bytes of the buffer supplied in @c pUserName, passed by value.
  *
  * @pre @c pUserName must point to a caller-allocated buffer of at least @c maxSize bytes. This
@@ -2923,9 +3079,15 @@ INT platform_hal_GetPppUserName(CHAR* pUserName, ULONG maxSize);
  *
  * Returns the password the platform authenticates its PPP session with.
  *
- * @param[out] pPassword - Caller-allocated, caller-owned buffer receiving the zero-terminated
- *                      password. The implementation does not retain the pointer after the call
- *                      returns.
+ * @param[out] pPassword - Caller-allocated, caller-owned buffer receiving the password as text.
+ *                      This interface states neither how many bytes the implementation writes nor
+ *                      whether it writes a terminator, so a caller must bound every read to the
+ *                      @c maxSize bytes it reported and, where a terminated string is required,
+ *                      must do so itself: zero-filling alone leaves no terminator if the
+ *                      implementation writes the whole buffer, so report a @c maxSize one byte
+ *                      short of the allocation and zero the byte beyond it before the call. This
+ *                      interface does not specify whether the implementation keeps the pointer
+ *                      after the call returns.
  * @param[in] maxSize - Size in bytes of the buffer supplied in @c pPassword, passed by value.
  *
  * @pre @c pPassword must point to a caller-allocated buffer of at least @c maxSize bytes. This
@@ -2988,9 +3150,9 @@ typedef enum {
 /**
  * @brief Structure representing network parameters for QoS and traffic management.
  *
- * This structure encapsulates the necessary network settings for managing 
- * Quality of Service (QoS) and traffic, including source and destination 
- * MAC and IP addresses, port numbers, protocol type, and DSCP value.
+ * This structure carries the network settings for managing Quality of Service (QoS) and traffic: a source
+ * MAC address, an IP version selector, source and destination IP addresses, source and destination port
+ * numbers, a transport protocol and a DSCP value. It declares no destination MAC address member.
  */
 typedef struct {
     /**
@@ -3088,11 +3250,11 @@ typedef struct {
  * Programs a Quality of Service and traffic management rule in the platform from a single
  * caller-supplied descriptor covering the flow's addresses, ports, protocol and DSCP marking.
  *
- * @param[in] params - Caller-allocated, caller-owned @c hal_network_params_t structure holding the
- *                     rule to apply. Every member and its valid range is described on
- *                     @c hal_network_params_t; the address union in use is selected by the
- *                     @c ip_version member. The structure is declared const and is read during the
- *                     call only, so the implementation neither modifies nor retains it.
+ * @param[in] params - Caller-allocated, caller-owned @c hal_network_params_t structure holding
+ *                     the rule to apply. Every member and its valid range is described on @c hal_network_params_t;
+ *                     the address union in use is selected by the @c ip_version member. The structure is declared
+ *                     const and is read during the call, so the implementation does not modify it; this
+ *                     interface does not specify whether it keeps the pointer after the call returns.
  *
  * @pre @c params must point to a fully initialised @c hal_network_params_t whose @c ip_version
  *      matches the address union member the caller populated. This interface does not define the

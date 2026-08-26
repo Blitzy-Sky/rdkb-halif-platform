@@ -106,59 +106,59 @@ extern "C"{
 #endif
 
 #ifndef CHAR
-#define CHAR  char //!< Character type alias used for the string buffers in this interface.
+#define CHAR  char /*!< @brief Character type alias used for the string buffers in this interface. */
 #endif
 
 #ifndef UCHAR
-#define UCHAR unsigned char //!< Unsigned character type alias, used for raw byte values.
+#define UCHAR unsigned char /*!< @brief Unsigned character type alias, used for raw byte values. */
 #endif
 
 #ifndef BOOLEAN
-#define BOOLEAN  unsigned char //!< Boolean type alias; carries @c TRUE or @c FALSE.
+#define BOOLEAN  unsigned char /*!< @brief Boolean type alias; carries @c TRUE or @c FALSE. */
 #endif
 
 #ifndef INT
-#define INT   int //!< Signed integer type alias; the return type of most functions here.
+#define INT   int /*!< @brief Signed integer type alias; the return type of most functions here. */
 #endif
 
 #ifndef UINT
-#define UINT  unsigned int //!< Unsigned integer type alias, used for indices and counts.
+#define UINT  unsigned int /*!< @brief Unsigned integer type alias, used for indices and counts. */
 #endif
 
 #ifndef ULONG
-#define ULONG unsigned long //!< Unsigned long type alias, used for sizes, counts and timeouts.
+#define ULONG unsigned long /*!< @brief Unsigned long type alias, used for sizes, counts and timeouts. */
 #endif
 
 #ifndef UINT8_t
-#define UINT8_t unsigned char //!< Fixed-width 8-bit unsigned integer type alias.
+#define UINT8_t unsigned char /*!< @brief Fixed-width 8-bit unsigned integer type alias. */
 #endif
 
 #ifndef UINT16_t
-#define UINT16_t unsigned short //!< Fixed-width 16-bit unsigned integer type alias.
+#define UINT16_t unsigned short /*!< @brief Fixed-width 16-bit unsigned integer type alias. */
 #endif
 
 #ifndef UINT32_t
-#define UINT32_t unsigned int //!< Fixed-width 32-bit unsigned integer type alias.
+#define UINT32_t unsigned int /*!< @brief Fixed-width 32-bit unsigned integer type alias. */
 #endif
 
 #ifndef UINT64_t
-#define UINT64_t unsigned long long //!< Fixed-width 64-bit unsigned integer type alias.
+#define UINT64_t unsigned long long /*!< @brief Fixed-width 64-bit unsigned integer type alias. */
 #endif
 
 #ifndef TRUE
-#define TRUE     1 //!< Value of a @c BOOLEAN argument or output meaning true.
+#define TRUE     1 /*!< @brief Value of a @c BOOLEAN argument or output meaning true. */
 #endif
 
 #ifndef FALSE
-#define FALSE    0 //!< Value of a @c BOOLEAN argument or output meaning false.
+#define FALSE    0 /*!< @brief Value of a @c BOOLEAN argument or output meaning false. */
 #endif
 
 #ifndef ENABLE
-#define ENABLE   1 //!< Value denoting an enabled state. No declaration in this file refers to it.
+#define ENABLE   1 /*!< @brief Value denoting an enabled state. No declaration in this file refers to it. */
 #endif
 
 #ifndef RETURN_OK
-#define RETURN_OK   0 //!< The operation completed successfully.
+#define RETURN_OK   0 /*!< @brief The operation completed successfully. */
 #endif
 
 #ifndef RETURN_ERR
@@ -184,24 +184,24 @@ extern "C"{
 #endif
 
 //DHCPv6 Options
-#define DHCPV6_OPT_3    3  //!< Identity Association for Non-temporary Addresses Option
-#define DHCPV6_OPT_5    5  //!< IA Address Option
-#define DHCPV6_OPT_15  15  //!< User Class Option
-#define DHCPV6_OPT_16  16  //!< Vendor Class Option
-#define DHCPV6_OPT_17  17  //!< OPTION_VENDOR_OPTS
-#define DHCPV6_OPT_20  20  //!< Reconfigure Accept Option
-#define DHCPV6_OPT_22  22  //!< OPTION_SIP_SERVER_A
-#define DHCPV6_OPT_23  23  //!< DNS Recursive Name Server option
-#define DHCPV6_OPT_24  24  //!< OPTION_DOMAIN_LIST
-#define DHCPV6_OPT_25  25  //!< Identity Association for Prefix Delegation Option
-#define DHCPV6_OPT_31  31  //!< OPTION_SNTP_SERVERS
-#define DHCPV6_OPT_64  64  //!< OPTION_AFTR_NAME
-#define DHCPV6_OPT_82  82  //!< OPTION_SOL_MAX_RT: Solicite Maximum Retry Time
-#define DHCPV6_OPT_83  83  //!< OPTION_INF_MAX_RT
-#define DHCPV6_OPT_95  95  //!< OPTION_SOL_MAX_RT: Solicite Maximum Retry Time
+#define DHCPV6_OPT_3    3  /*!< @brief Identity Association for Non-temporary Addresses Option */
+#define DHCPV6_OPT_5    5  /*!< @brief IA Address Option */
+#define DHCPV6_OPT_15  15  /*!< @brief User Class Option */
+#define DHCPV6_OPT_16  16  /*!< @brief Vendor Class Option */
+#define DHCPV6_OPT_17  17  /*!< @brief OPTION_VENDOR_OPTS */
+#define DHCPV6_OPT_20  20  /*!< @brief Reconfigure Accept Option */
+#define DHCPV6_OPT_22  22  /*!< @brief OPTION_SIP_SERVER_A */
+#define DHCPV6_OPT_23  23  /*!< @brief DNS Recursive Name Server option */
+#define DHCPV6_OPT_24  24  /*!< @brief OPTION_DOMAIN_LIST */
+#define DHCPV6_OPT_25  25  /*!< @brief Identity Association for Prefix Delegation Option */
+#define DHCPV6_OPT_31  31  /*!< @brief OPTION_SNTP_SERVERS */
+#define DHCPV6_OPT_64  64  /*!< @brief OPTION_AFTR_NAME */
+#define DHCPV6_OPT_82  82  /*!< @brief OPTION_SOL_MAX_RT: Solicite Maximum Retry Time */
+#define DHCPV6_OPT_83  83  /*!< @brief OPTION_INF_MAX_RT */
+#define DHCPV6_OPT_95  95  /*!< @brief OPTION_SOL_MAX_RT: Solicite Maximum Retry Time */
 
 //DHCPv4 Options
-#define DHCPV4_OPT_2   2   //!< Time Offset
+#define DHCPV4_OPT_2   2   /*!< @brief Time Offset */
 #define DHCPV4_OPT_42  42  //!< NTP Server Addresses
 #define DHCPV4_OPT_43  43  //!< Vendor Specific Information
 #define DHCPV4_OPT_58  58  //!< DHCP Renewal (T1) Time
@@ -215,8 +215,8 @@ extern "C"{
 #define DHCPV4_OPT_243 243 //!< Private Use
 #define DHCPV4_OPT_END 255 //!< DHCP Option End - used to check if option is valid
 
-#define FW_NAME_MAX_LEN 64 //!< Buffer length, in bytes, of a firmware image name string.
-#define FW_STATE_MAX_LEN 64 //!< Buffer length, in bytes, of a firmware bank state string.
+#define FW_NAME_MAX_LEN 64 /*!< @brief Buffer length, in bytes, of a firmware image name string. */
+#define FW_STATE_MAX_LEN 64 /*!< @brief Buffer length, in bytes, of a firmware bank state string. */
 
 /**********************************************************************
                 ENUMERATION DEFINITIONS
@@ -231,15 +231,15 @@ extern "C"{
  * RDK framework.
  */
 typedef enum {
-   HOST_CPU=0,          /**< Represents the main host CPU, which typically handles
+   HOST_CPU=0,          /*!< Represents the main host CPU, which typically handles
                          *   primary tasks and operations in the RDK environment. */
 
-   PEER_CPU=1,          /**< Represents a secondary or peer CPU. These CPUs might be
+   PEER_CPU=1,          /*!< Represents a secondary or peer CPU. These CPUs might be
                          *   used for offloading specific tasks, handling parallel
                          *   processes, or managing other dedicated operations
                          *   alongside the main host CPU. */
 
-   NOT_SUPPORTED_CPU=3  /**< Denotes an unsupported or unrecognized CPU type. This value
+   NOT_SUPPORTED_CPU=3  /*!< Denotes an unsupported or unrecognized CPU type. This value
                          *   can be used to identify and handle scenarios where a CPU type
                          *   is encountered that doesn't match known configurations in
                          *   the RDK environment. */
@@ -247,7 +247,7 @@ typedef enum {
 RDK_CPUS; //!< Enum type indicating the CPU classifications within the RDK framework.
 
 #ifndef PLAT_PROC_MEM_MAX_LEN
-#define PLAT_PROC_MEM_MAX_LEN   40 //!< Maximum length in bytes of a memory path string, including its terminator.
+#define PLAT_PROC_MEM_MAX_LEN   40 /*!< @brief Maximum length in bytes of a memory path string, including its terminator. */
 #endif
 
 /**********************************************************************
@@ -1465,7 +1465,7 @@ INT platform_hal_setFactoryCmVariant(CHAR *pValue);
  * @{
  */
 
-#define LED_BUFFER_SIZE 3 //!< Number of LED entries a caller may address through the LED functions.
+#define LED_BUFFER_SIZE 3 /*!< @brief Number of LED entries a caller may address through the LED functions. */
 
 /**
 * @enum LED_COLOR
@@ -1493,8 +1493,23 @@ typedef enum {
 typedef struct _LEDMGMT_PARAMS
 {
 #ifdef FEATURE_RDKB_LED_MANAGER
-    char * led_name;            //!< Name of the LED to act on. This interface publishes no set of accepted names, and it establishes nothing about the storage behind this pointer: it states no maximum length, no allocation rule, no guarantee that the text is zero-terminated, and no statement of whether the caller or the implementation owns it. On input to @c platform_hal_setLed a caller must therefore supply its own storage and keep it valid for at least the duration of the call; on output from @c platform_hal_getLed a caller cannot tell whether the implementation writes into storage the caller installed or replaces the pointer with storage of its own, so it must not free the pointer it reads back, must not write through it, and must not assume the text is bounded or terminated. Whether this member may be NULL is also unspecified.
-    char * led_param;           //!< Additional parameters for the LED, in a vendor-defined form this interface does not describe. Length, allocation, termination, ownership and null handling are unspecified exactly as for @c led_name, so a caller must supply and retain its own storage on input and must treat anything it reads back as being of unknown length, unknown termination and unknown ownership. Because no capacity is stated for either member, a caller cannot size a buffer from this header and must obtain any bound it needs from the implementation it runs against.
+    /**
+     * @brief Name of the LED the call acts on.
+     *
+     * This interface publishes no set of accepted names, so which names a platform recognises is
+     * settled with the implementation rather than derived from this header. It establishes nothing
+     * about the storage behind this pointer either: no maximum length, no allocation rule, no
+     * guarantee that the text is zero-terminated, no statement of whether the caller or the
+     * implementation owns it, and no statement of whether the member may be NULL.
+     *
+     * On input to @c platform_hal_setLed a caller therefore supplies its own storage and keeps it
+     * valid for at least the duration of the call. On output from @c platform_hal_getLed a caller
+     * cannot tell whether the implementation writes into storage the caller installed or replaces
+     * the pointer with storage of its own, so it must not free the pointer it reads back, must not
+     * write through it, and must not assume the text is bounded or terminated.
+     */
+    char * led_name;            /*!< Name of the LED to act on; this interface publishes no set of accepted names. */
+    char * led_param;           /*!< @brief Additional parameters for the LED, in a vendor-defined form this interface does not describe. Length, allocation, termination, ownership and null handling are unspecified exactly as for @c led_name, so a caller must supply and retain its own storage on input and must treat anything it reads back as being of unknown length, unknown termination and unknown ownership. Because no capacity is stated for either member, a caller cannot size a buffer from this header and must obtain any bound it needs from the implementation it runs against. */
 #endif
     LED_COLOR  LedColor;        //!< LED color choice from @ref LED_COLOR enum.
     INT  State;                 //!< LED state (0 for Solid, 1 for Blink).
@@ -2412,7 +2427,7 @@ INT platform_hal_GetMemoryPaths(RDK_CPUS index, PPLAT_PROC_MEM_INFO *ppinfo);
  * @struct dhcp_opt_list
  * @brief Singly linked list node carrying one DHCPv4 or DHCPv6 option and its value.
  *
- * The structure represents a linked list, where each node contains 
+ * The structure represents a linked list, where each node contains
  * an option and its corresponding value.
  *
  * A caller meets this type only as the head of a list produced by
@@ -2428,8 +2443,45 @@ INT platform_hal_GetMemoryPaths(RDK_CPUS index, PPLAT_PROC_MEM_INFO *ppinfo);
  * members are documented on those terms.
  */
 typedef struct dhcp_opt_list {
-    int dhcp_opt; /*!< DHCP option code carried by this node, held as a plain @c int. The header defines a named constant for each code this interface names: @c DHCPV6_OPT_3, @c DHCPV6_OPT_5, @c DHCPV6_OPT_15, @c DHCPV6_OPT_16, @c DHCPV6_OPT_17, @c DHCPV6_OPT_20, @c DHCPV6_OPT_22, @c DHCPV6_OPT_23, @c DHCPV6_OPT_24, @c DHCPV6_OPT_25, @c DHCPV6_OPT_31, @c DHCPV6_OPT_64, @c DHCPV6_OPT_82, @c DHCPV6_OPT_83 and @c DHCPV6_OPT_95 on the DHCPv6 side, and @c DHCPV4_OPT_2, @c DHCPV4_OPT_42, @c DHCPV4_OPT_43, @c DHCPV4_OPT_58, @c DHCPV4_OPT_59, @c DHCPV4_OPT_60, @c DHCPV4_OPT_61, @c DHCPV4_OPT_100, @c DHCPV4_OPT_122, @c DHCPV4_OPT_125, @c DHCPV4_OPT_242, @c DHCPV4_OPT_243 and @c DHCPV4_OPT_END on the DHCPv4 side. Each constant equals the registered code of the option its own comment names; the DHCPv4 codes are those defined by RFC 2132 and the IANA registry that continues it, so the meaning of a code is fixed there and not by this interface. @c DHCPV4_OPT_END is the RFC 2132 End option, code 255, which the macro's comment describes as the value used to check whether an option is valid; this interface does not state that a node carrying it ends a list. Neither is the member restricted to the constants above: each protocol's code space is larger than the set named here, so a caller must be prepared for a code it has no constant for and must not read an unrecognised value as corruption. */
-    char * dhcp_opt_val; /*!< Pointer to the value associated with the DHCP option code. This interface states neither how long that value is nor how a caller determines its length: the member is a bare @c char pointer, no length travels beside it, the option code does not fix a length for every option, and nothing here establishes that the bytes are NUL-terminated text rather than a counted binary value - several of the options named above carry binary payloads. The readable extent of the value is therefore unspecified, as is whether the pointer may be NULL for an option that carries no value. A caller must not dereference it, and must not copy or print it with an unbounded string operation, until it has established the representation and the length rule with the implementation it runs against. Which side allocated the value and which side releases it are equally unstated; see the description above. */
+    /**
+     * @brief DHCP option code carried by this node.
+     *
+     * The header names a constant for each code this interface calls out: @c DHCPV6_OPT_3,
+     * @c DHCPV6_OPT_5, @c DHCPV6_OPT_15, @c DHCPV6_OPT_16, @c DHCPV6_OPT_17, @c DHCPV6_OPT_20,
+     * @c DHCPV6_OPT_22, @c DHCPV6_OPT_23, @c DHCPV6_OPT_24, @c DHCPV6_OPT_25, @c DHCPV6_OPT_31,
+     * @c DHCPV6_OPT_64, @c DHCPV6_OPT_82, @c DHCPV6_OPT_83 and @c DHCPV6_OPT_95 on the DHCPv6
+     * side, and @c DHCPV4_OPT_2, @c DHCPV4_OPT_42, @c DHCPV4_OPT_43, @c DHCPV4_OPT_58,
+     * @c DHCPV4_OPT_59, @c DHCPV4_OPT_60, @c DHCPV4_OPT_61, @c DHCPV4_OPT_100, @c DHCPV4_OPT_122,
+     * @c DHCPV4_OPT_125, @c DHCPV4_OPT_242, @c DHCPV4_OPT_243 and @c DHCPV4_OPT_END on the DHCPv4
+     * side. Each constant equals the registered code of the option its own comment names; the
+     * DHCPv4 codes are those defined by RFC 2132 and the IANA registry that continues it, so the
+     * meaning of a code is fixed there and not by this interface.
+     *
+     * @c DHCPV4_OPT_END is the RFC 2132 End option, code 255, which the macro's comment describes
+     * as the value used to check whether an option is valid; this interface does not state that a
+     * node carrying it ends a list.
+     *
+     * The member is not restricted to the constants above: each protocol's code space is larger
+     * than the set named here, so a caller must be prepared for a code it has no constant for and
+     * must not read an unrecognised value as corruption.
+     */
+    int dhcp_opt; /*!< DHCP option code for this node, held as a plain @c int and not restricted to the named option constants. */
+    /**
+     * @brief Pointer to the value associated with the DHCP option code.
+     *
+     * This interface states neither how long that value is nor how a caller determines its length:
+     * the member is a bare @c char pointer, no length travels beside it, the option code does not
+     * fix a length for every option, and nothing here establishes that the bytes are
+     * NUL-terminated text rather than a counted binary value - several of the options named for
+     * @c dhcp_opt carry binary payloads. The readable extent of the value is therefore
+     * unspecified, as is whether the pointer may be NULL for an option that carries no value.
+     *
+     * A caller must not dereference it, and must not copy or print it with an unbounded string
+     * operation, until it has established the representation and the length rule with the
+     * implementation it runs against. Which side allocated the value and which side releases it
+     * are equally unstated; see the description of @c dhcp_opt_list.
+     */
+    char * dhcp_opt_val; /*!< Value bytes for @c dhcp_opt; no length travels beside the pointer, so the readable extent is unspecified. */
     struct dhcp_opt_list * next; /*!< Pointer to the next DHCP option in the list. This interface does not state how the list ends: it does not say that the last node holds NULL here, and it publishes no node count, no length accessor and no other terminator, so a caller cannot derive a stopping condition for a traversal from this header alone. Whether the nodes were allocated by the implementation or by the caller is not stated either, and no function declared here releases them; see the description above. */
 } dhcp_opt_list;
 

@@ -704,8 +704,8 @@ absence of a symbol.
 The product can be configured through the following compile-time defines:
 
 ```c
-FEATURE_RDKB_LED_MANAGER        /* Enable the LED Manager */
-FEATURE_RDKB_THERMAL_MANAGER    /* Enable the Thermal Manager */
+FEATURE_RDKB_LED_MANAGER
+FEATURE_RDKB_THERMAL_MANAGER
 ```
 
 The effect of each flag on the declared surface is enumerated under **Optional Components**,

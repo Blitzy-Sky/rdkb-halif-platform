@@ -4,22 +4,22 @@
 
 | Date | Comment | Version |
 | --- | --- | --- |
-| 2026-08-24 | Specification rewritten to the canonical RDK-B HAL topic set. Documentation only: the interface itself is unchanged, so this revision introduces no new release. | 1.3.3 (documentation revision) |
-| Not stated in `CHANGELOG.md` | Return value extended for unsupported HAL functions through `RETURN_UNSUPPORTED`, and the thermal manager functions implemented for XB10 and XB9, under RDKB-65287. | 1.3.3 |
-| 2024-11-29 | `platform_hal.h` corrected under issue #23. | 1.3.2 |
-| 2024-11-29 | Major version check aligned to `main` under issue #11; `build_ut.sh` updated. | 1.3.1 |
-| 2024-11-27 | QoS and traffic management added through `platform_hal_qos_apply`. | 1.3.0 |
-| 2024-11-25 | PPP username and password reads added under RDKBDEV-2733. | 1.2.1 |
-| 2023-12-28 | ECO mode status read added under RDKBDEV-2326. | 1.2.0 |
-| 2023-11-20 | DHCP option defines extended; header updated for the unified WAN manager under RDKB-52640. | 1.1.0 |
-| 2023-11-13 | Repository housekeeping only; the declared interface did not change. | 1.0.1 |
 | 2023-11-08 | Initial Platform HAL interface release under RDKB-52300. | 1.0.0 |
+| 2023-11-13 | Repository housekeeping only; the declared interface did not change. | 1.0.1 |
+| 2023-11-20 | DHCP option defines extended; header updated for the unified WAN manager under RDKB-52640. | 1.1.0 |
+| 2023-12-28 | ECO mode status read added under RDKBDEV-2326. | 1.2.0 |
+| 2024-11-25 | PPP username and password reads added under RDKBDEV-2733. | 1.2.1 |
+| 2024-11-27 | QoS and traffic management added through `platform_hal_qos_apply`. | 1.3.0 |
+| 2024-11-29 | Major version check aligned to `main` under issue #11; `build_ut.sh` updated. | 1.3.1 |
+| 2024-11-29 | `platform_hal.h` corrected under issue #23. | 1.3.2 |
+| Not stated in `CHANGELOG.md` | Return value extended for unsupported HAL functions through `RETURN_UNSUPPORTED`, and the thermal manager functions implemented for XB10 and XB9, under RDKB-65287. | 1.3.3 |
+| 2026-08-24 | Specification rewritten to the canonical RDK-B HAL topic set. Documentation only: the interface itself is unchanged, so this revision introduces no new release. | 1.3.3 (documentation revision) |
 
-**Provenance of this page.** It was renamed from `docs/pages/PlatformhalSpec.md` to `docs/pages/halSpec.md` in the same change that rewrote it against the canonical topic set. Git records a rename only where the two versions still resemble each other, and a full rewrite does not, so `git log --follow -- docs/pages/halSpec.md` begins at that change: the revisions before it are reached with `git log -- docs/pages/PlatformhalSpec.md`.
+**Provenance of this page.** It was renamed from `docs/pages/PlatformhalSpec.md` to `docs/pages/halSpec.md` in the same change that rewrote it against the canonical topic set. Git records a rename only where the two versions still resemble each other, and a full rewrite does not, so `git log --follow -- docs/pages/halSpec.md` begins at that change: the revisions before it are reached with `git log -- docs/pages/PlatformhalSpec.md`. That resemblance is measured, and the threshold is 50% by default, so lowering it to git's floor \- `git log --follow -M1% -- docs/pages/halSpec.md` \- is worth trying first: where it pairs the two paths it shows both stretches of history in one listing, and where the rewrite kept too little of the original for git to pair them at any threshold the second command above remains the only route to the earlier revisions.
 
 Four distinct version identities apply to this repository and must not be conflated:
 
-- **Document revision** \- the state of this specification, recorded in the first row above.
+- **Document revision** \- the state of this specification, recorded in the last row above.
 - **Interface version** \- **this interface declares none.** Unlike some sibling HALs,
   `platform_hal.h` defines no major, minor or maintenance version macro, so a caller cannot test
   the Platform HAL interface version at compile time or at run time. Callers that need to
@@ -137,22 +137,22 @@ will not see the corresponding declarations at all, so the availability of these
 build-time property rather than a run-time one.
 
 - `FEATURE_RDKB_LED_MANAGER` gates exactly one function,
-  [`platform_hal_initLed`](../../include/platform_hal.h#L1537). It additionally gates the
+  [`platform_hal_initLed`](../../include/platform_hal.h#L1574). It additionally gates the
   `led_name` and `led_param` members of
-  [`LEDMGMT_PARAMS`](../../include/platform_hal.h#L1485), so the structure a caller populates for
+  [`LEDMGMT_PARAMS`](../../include/platform_hal.h#L1518), so the structure a caller populates for
   `platform_hal_setLed` differs in shape between the two builds.
 - `FEATURE_RDKB_THERMAL_MANAGER` gates eight functions:
-  [`platform_hal_initThermal`](../../include/platform_hal.h#L1835),
-  [`platform_hal_LoadThermalConfig`](../../include/platform_hal.h#L1870),
-  [`platform_hal_setFanSpeed`](../../include/platform_hal.h#L1943),
-  [`platform_hal_getFanTemperature`](../../include/platform_hal.h#L1980),
-  [`platform_hal_getInputCurrent`](../../include/platform_hal.h#L2017),
-  [`platform_hal_getInputPower`](../../include/platform_hal.h#L2053),
-  [`platform_hal_getRadioTemperature`](../../include/platform_hal.h#L2096) and
-  [`platform_hal_getEcoModeStatus`](../../include/platform_hal.h#L2138). It also gates the types
-  [`FAN_SPEED`](../../include/platform_hal.h#L1769),
-  [`THERMAL_PLATFORM_CONFIG`](../../include/platform_hal.h#L1788) and
-  [`FAN_ERR`](../../include/platform_hal.h#L1889).
+  [`platform_hal_initThermal`](../../include/platform_hal.h#L1872),
+  [`platform_hal_LoadThermalConfig`](../../include/platform_hal.h#L1906),
+  [`platform_hal_setFanSpeed`](../../include/platform_hal.h#L1978),
+  [`platform_hal_getFanTemperature`](../../include/platform_hal.h#L2014),
+  [`platform_hal_getInputCurrent`](../../include/platform_hal.h#L2050),
+  [`platform_hal_getInputPower`](../../include/platform_hal.h#L2085),
+  [`platform_hal_getRadioTemperature`](../../include/platform_hal.h#L2127) and
+  [`platform_hal_getEcoModeStatus`](../../include/platform_hal.h#L2167). It also gates the types
+  [`FAN_SPEED`](../../include/platform_hal.h#L1807),
+  [`THERMAL_PLATFORM_CONFIG`](../../include/platform_hal.h#L1826) and
+  [`FAN_ERR`](../../include/platform_hal.h#L1925).
 
 **The gating is deliberately asymmetric, and a caller must not generalise from the names.** The
 LED functions `platform_hal_setLed` and `platform_hal_getLed` are unconditional; only
@@ -189,7 +189,7 @@ them: they may be called in any order.**
 
 - [`platform_hal_PandMDBInit`](../../include/platform_hal.h#L666)
 - [`platform_hal_DocsisParamsDBInit`](../../include/platform_hal.h#L694)
-- [`platform_hal_initThermal`](../../include/platform_hal.h#L1835) \- declared only when
+- [`platform_hal_initThermal`](../../include/platform_hal.h#L1872) \- declared only when
   `FEATURE_RDKB_THERMAL_MANAGER` is defined, so a build without that flag has a two-call
   initialization sequence
 
@@ -198,7 +198,7 @@ interface is expected to block if the hardware is not ready.** A caller must the
 initialization as a call that may take an indeterminate time rather than one that returns
 promptly.
 
-[`platform_hal_initLed`](../../include/platform_hal.h#L1537) is an initialization call for the LED
+[`platform_hal_initLed`](../../include/platform_hal.h#L1574) is an initialization call for the LED
 subsystem specifically rather than part of the boot sequence above. It is declared only when
 `FEATURE_RDKB_LED_MANAGER` is defined, it reports the path of the vendor's LED configuration file,
 and its own documentation directs a caller that receives `RETURN_ERR` from it to treat the LED
@@ -276,8 +276,8 @@ sizes are stated per function on the declaration.
   to overwrite. A copy the caller made for itself is the exception, because no implementation holds
   a pointer to it.
 - One function inverts this and the caller must not miss it:
-  [`platform_hal_GetMemoryPaths`](../../include/platform_hal.h#L2391) allocates a
-  [`PLAT_PROC_MEM_INFO`](../../include/platform_hal.h#L288) array itself and returns it through a
+  [`platform_hal_GetMemoryPaths`](../../include/platform_hal.h#L2415) allocates a
+  [`PLAT_PROC_MEM_INFO`](../../include/platform_hal.h#L286) array itself and returns it through a
   caller-held pointer, rather than filling a caller-supplied buffer.
 
 #### Module Responsibilities
@@ -304,9 +304,9 @@ The HAL is not involved in any of the power management operation. Any power mana
 transitions MUST not affect the operation of the HAL.
 
 Two functions in this interface concern power state as *data* and do not make the HAL a
-participant in power management. [`platform_hal_SetLowPowerModeState`](../../include/platform_hal.h#L2565)
-carries a [`PSM_STATE`](../../include/platform_hal.h#L2523) value, and
-[`platform_hal_getEcoModeStatus`](../../include/platform_hal.h#L2138) reports the ECO mode status
+participant in power management. [`platform_hal_SetLowPowerModeState`](../../include/platform_hal.h#L2659)
+carries a [`PSM_STATE`](../../include/platform_hal.h#L2618) value, and
+[`platform_hal_getEcoModeStatus`](../../include/platform_hal.h#L2167) reports the ECO mode status
 of a radio module. Both report or set data-model state only.
 
 *Source: the prior revision of this specification, and the `@note` on `PSM_STATE` in
@@ -335,8 +335,8 @@ any of its functions.** That is stated per function in the header rather than le
 caller must therefore not assume a bound, and a caller that needs one must impose its own timeout
 around the call and decide for itself how to treat a call that has not returned.
 
-**Calls known to take longer:** [`platform_hal_StartMACsec`](../../include/platform_hal.h#L2321)
-and [`platform_hal_StopMACsec`](../../include/platform_hal.h#L2350) take an explicit timeout
+**Calls known to take longer:** [`platform_hal_StartMACsec`](../../include/platform_hal.h#L2345)
+and [`platform_hal_StopMACsec`](../../include/platform_hal.h#L2374) take an explicit timeout
 argument and wait for the outcome, and initialization is expected to block while the hardware is
 not ready. These are the calls a caller should expect to hold a thread longest.
 
@@ -351,12 +351,12 @@ responsible for handling system errors, such as an out-of-memory condition, inte
 
 Three status codes are defined, and the set a caller must handle differs by function.
 
-- [`RETURN_OK`](../../include/platform_hal.h#L163), value 0 \- the operation completed
+- [`RETURN_OK`](../../include/platform_hal.h#L161), value 0 \- the operation completed
   successfully.
-- [`RETURN_ERR`](../../include/platform_hal.h#L173), value -1 \- the operation failed. This
+- [`RETURN_ERR`](../../include/platform_hal.h#L171), value -1 \- the operation failed. This
   interface reports no more specific cause, so a caller should discard any output, and retry or
   report the failure.
-- [`RETURN_UNSUPPORTED`](../../include/platform_hal.h#L185), value -2 \- the platform does not
+- [`RETURN_UNSUPPORTED`](../../include/platform_hal.h#L183), value -2 \- the platform does not
   implement the function. It is returned by exactly six functions, all inside the
   `FEATURE_RDKB_THERMAL_MANAGER` block: `platform_hal_setFanSpeed`,
   `platform_hal_getFanTemperature`, `platform_hal_getInputCurrent`, `platform_hal_getInputPower`,
@@ -366,13 +366,13 @@ Three status codes are defined, and the set a caller must handle differs by func
 Four functions do not participate in this scheme at all, and treating their return value as a
 status code is an error:
 
-- [`platform_hal_getRotorLock`](../../include/platform_hal.h#L1691) returns its own discrete codes
+- [`platform_hal_getRotorLock`](../../include/platform_hal.h#L1729) returns its own discrete codes
   \- 1 for a locked rotor, 0 for an unlocked rotor, and -1 where the platform or the selected fan
   provides no rotor lock indication. The -1 case means "unknown", not "not locked", and must not
   be read as a generic failure even though it shares the numeric value of `RETURN_ERR`.
-- [`platform_hal_getFanSpeed`](../../include/platform_hal.h#L1632),
-  [`platform_hal_getRPM`](../../include/platform_hal.h#L1659) and
-  [`platform_hal_getFanStatus`](../../include/platform_hal.h#L1717) return a reading or a state
+- [`platform_hal_getFanSpeed`](../../include/platform_hal.h#L1666),
+  [`platform_hal_getRPM`](../../include/platform_hal.h#L1693) and
+  [`platform_hal_getFanStatus`](../../include/platform_hal.h#L1755) return a reading or a state
   rather than a status code, and **this interface defines no distinguished value by which any of
   them signals failure.** A caller consequently cannot separate a genuine reading of 0, or a
   disabled fan, from a failed query. That is a property of the interface, not an omission in this
@@ -389,11 +389,11 @@ There is no requirement for the HAL to persist any setting information. The call
 for persisting any settings related to its own implementation.
 
 Two qualifications follow from the interface itself. The values behind
-[`platform_hal_getFactoryPartnerId`](../../include/platform_hal.h#L1372),
-[`platform_hal_getFactoryCmVariant`](../../include/platform_hal.h#L1407) and
-[`platform_hal_GetFactoryResetCount`](../../include/platform_hal.h#L1219) are factory- or
+[`platform_hal_getFactoryPartnerId`](../../include/platform_hal.h#L1385),
+[`platform_hal_getFactoryCmVariant`](../../include/platform_hal.h#L1425) and
+[`platform_hal_GetFactoryResetCount`](../../include/platform_hal.h#L1227) are factory- or
 device-held rather than HAL-held, and a caller reads them rather than persisting them. And
-[`platform_hal_GetInterfaceStats`](../../include/platform_hal.h#L2986) documents that this
+[`platform_hal_GetInterfaceStats`](../../include/platform_hal.h#L3088) documents that this
 interface does not specify the point from which its counters accumulate or whether anything resets
 them, so a caller that needs a rate must difference two reads rather than assume a starting value
 or a persisted baseline.
@@ -456,14 +456,14 @@ redaction helper and no secure-buffer type, so nothing enforces them mechanicall
 
   | Protected value | Where it is declared, and the call that moves it | Why it is protected |
   | --- | --- | --- |
-  | The `PPP` password | The `pPassword` output of [`platform_hal_GetPppPassword`](../../include/platform_hal.h#L3081). | A `WAN` access credential. The pair authenticates the device to the operator's network, so disclosure of either half narrows an attack on the other and disclosure of both is complete. |
-  | The `PPP` user name | The `pUserName` output of [`platform_hal_GetPppUserName`](../../include/platform_hal.h#L3033). | The other half of that pair. A known user name reduces the credential to a single unknown, which is why it is protected to the same standard as the password. |
-  | The device serial number | The `pValue` output of [`platform_hal_GetSerialNumber`](../../include/platform_hal.h#L811). | A unit-unique identifier that links a device to a subscriber record, and personal data in that context. |
-  | The base `MAC` address | The `pValue` output of [`platform_hal_GetBaseMacAddress`](../../include/platform_hal.h#L996). | The address from which every interface address on the unit is derived, so it identifies the device on any network it reaches; its leading octets also disclose the vendor. |
-  | The `CMTS` `MAC` address | The `pValue` output of [`platform_hal_getCMTSMac`](../../include/platform_hal.h#L2598). | The hardware address of the headend this device is registered to. It places the subscriber within a named segment of the operator's access network, which is topology a reader of a log should not acquire. |
-  | `Traffic_client` `mac` [`:2779`](../../include/platform_hal.h#L2779), with the `rxBytes` [`:2644`](../../include/platform_hal.h#L2644) and `txBytes` [`:2782`](../../include/platform_hal.h#L2782) counters recorded against it | Filled by [`platform_hal_getDscpClientList`](../../include/platform_hal.h#L2791) into the `Client` array of [`DSCP_Element_t`](../../include/platform_hal.h#L2660). | The hardware address of a device on the subscriber's own network, and that device's traffic volume beside it. Published together they attribute usage to an identified household device, so the three members are one protected group rather than an address and two harmless numbers. |
-  | `hal_network_params_t` `src_mac` [`:3157-3236`](../../include/platform_hal.h#L3129), the `src_ip` union's `ipv4` [`:3147`](../../include/platform_hal.h#L3147) and `ipv6` [`:3148`](../../include/platform_hal.h#L3148), and the `dest_ip` union's `ipv4` [`:3159`](../../include/platform_hal.h#L3159) and `ipv6` [`:3160`](../../include/platform_hal.h#L3160) | Populated by the caller and passed in to [`platform_hal_qos_apply`](../../include/platform_hal.h#L3248). | The endpoints of a live flow: the source identifies a device on the subscriber's network and the destination identifies what it was communicating with, so the pair records who contacted whom. These are protected on the way in exactly as the others are on the way out — the caller that assembled the structure can disclose it as easily as the implementation that receives it. |
-  | `dhcp_opt_list` `dhcp_opt_val` [`:2415`](../../include/platform_hal.h#L2415), where the option it belongs to carries an identifier or an address | Returned by [`platform_hal_GetDhcpv4_Options`](../../include/platform_hal.h#L2458) and [`platform_hal_GetDhcpv6_Options`](../../include/platform_hal.h#L2494). | An option value whose content this interface does not describe. The codes listed on `dhcp_opt` [`:2410`](../../include/platform_hal.h#L2410) include `DHCPV4_OPT_61` and `DHCPV4_OPT_122`, which carry a client identifier and address material respectively, so a value under one of those codes is protected. A caller that cannot establish which code a node holds treats the value as protected. |
+  | The `PPP` password | The `pPassword` output of [`platform_hal_GetPppPassword`](../../include/platform_hal.h#L3168). | A `WAN` access credential. The pair authenticates the device to the operator's network, so disclosure of either half narrows an attack on the other and disclosure of both is complete. |
+  | The `PPP` user name | The `pUserName` output of [`platform_hal_GetPppUserName`](../../include/platform_hal.h#L3127). | The other half of that pair. A known user name reduces the credential to a single unknown, which is why it is protected to the same standard as the password. |
+  | The device serial number | The `pValue` output of [`platform_hal_GetSerialNumber`](../../include/platform_hal.h#L809). | A unit-unique identifier that links a device to a subscriber record, and personal data in that context. |
+  | The base `MAC` address | The `pValue` output of [`platform_hal_GetBaseMacAddress`](../../include/platform_hal.h#L999). | The address from which every interface address on the unit is derived, so it identifies the device on any network it reaches; its leading octets also disclose the vendor. |
+  | The `CMTS` `MAC` address | The `pValue` output of [`platform_hal_getCMTSMac`](../../include/platform_hal.h#L2697). | The hardware address of the headend this device is registered to. It places the subscriber within a named segment of the operator's access network, which is topology a reader of a log should not acquire. |
+  | `Traffic_client` `mac` [`:2742`](../../include/platform_hal.h#L2742), with the `rxBytes` [`:2743`](../../include/platform_hal.h#L2743) and `txBytes` [`:2744`](../../include/platform_hal.h#L2744) counters recorded against it | Filled by [`platform_hal_getDscpClientList`](../../include/platform_hal.h#L2888) into the `Client` array of [`DSCP_Element_t`](../../include/platform_hal.h#L2759). | The hardware address of a device on the subscriber's own network, and that device's traffic volume beside it. Published together they attribute usage to an identified household device, so the three members are one protected group rather than an address and two harmless numbers. |
+  | `hal_network_params_t` `src_mac` [`:3216`](../../include/platform_hal.h#L3216), the `src_ip` union's `ipv4` [`:3234`](../../include/platform_hal.h#L3234) and `ipv6` [`:3235`](../../include/platform_hal.h#L3235), and the `dest_ip` union's `ipv4` [`:3246`](../../include/platform_hal.h#L3246) and `ipv6` [`:3247`](../../include/platform_hal.h#L3247) | Populated by the caller and passed in to [`platform_hal_qos_apply`](../../include/platform_hal.h#L3332). | The endpoints of a live flow: the source identifies a device on the subscriber's network and the destination identifies what it was communicating with, so the pair records who contacted whom. These are protected on the way in exactly as the others are on the way out — the caller that assembled the structure can disclose it as easily as the implementation that receives it. |
+  | `dhcp_opt_list` `dhcp_opt_val` [`:2484`](../../include/platform_hal.h#L2484), where the option it belongs to carries an identifier or an address | Returned by [`platform_hal_GetDhcpv4_Options`](../../include/platform_hal.h#L2542) and [`platform_hal_GetDhcpv6_Options`](../../include/platform_hal.h#L2589). | An option value whose content this interface does not describe. The codes listed on `dhcp_opt` [`:2468`](../../include/platform_hal.h#L2468) include `DHCPV4_OPT_61` and `DHCPV4_OPT_122`, which carry a client identifier and address material respectively, so a value under one of those codes is protected. A caller that cannot establish which code a node holds treats the value as protected. |
 - **No protected value, and no fragment, hash or length of one, is written at any severity.**
   Neither an implementation nor a caller may write a protected value — whole, truncated, prefixed,
   suffixed, first-and-last character, encoded, encrypted, hashed, or reduced to a character count or
@@ -510,21 +510,21 @@ redaction helper and no secure-buffer type, so nothing enforces them mechanicall
     implementation holds a pointer to it, so it is overwritten as soon as the caller is done with
     it, with nothing to establish first.
   - *Storage the caller handed across the boundary* is the case the old wording got the wrong way
-    round. The buffers passed to [`platform_hal_GetPppPassword`](../../include/platform_hal.h#L3081),
-    [`platform_hal_GetPppUserName`](../../include/platform_hal.h#L3033), [`platform_hal_GetSerialNumber`](../../include/platform_hal.h#L811),
-    [`platform_hal_GetBaseMacAddress`](../../include/platform_hal.h#L996) and [`platform_hal_getCMTSMac`](../../include/platform_hal.h#L2598), the
-    `DSCP_list_t` allocated for [`platform_hal_getDscpClientList`](../../include/platform_hal.h#L2791) to fill, and the
-    `hal_network_params_t` assembled for [`platform_hal_qos_apply`](../../include/platform_hal.h#L3248) — the last two of
+    round. The buffers passed to [`platform_hal_GetPppPassword`](../../include/platform_hal.h#L3168),
+    [`platform_hal_GetPppUserName`](../../include/platform_hal.h#L3127), [`platform_hal_GetSerialNumber`](../../include/platform_hal.h#L809),
+    [`platform_hal_GetBaseMacAddress`](../../include/platform_hal.h#L999) and [`platform_hal_getCMTSMac`](../../include/platform_hal.h#L2697), the
+    `DSCP_list_t` allocated for [`platform_hal_getDscpClientList`](../../include/platform_hal.h#L2888) to fill, and the
+    `hal_network_params_t` assembled for [`platform_hal_qos_apply`](../../include/platform_hal.h#L3332) — the last two of
     which hold addresses after the call as surely as before it — each stay allocated, unmoved and
     unmodified until non-retention, release or the completion of any asynchronous use has been
     established for them. Under this interface that means an explicit statement from the
     implementation being integrated, since no declaration provides one. Erasure then follows
     immediately, not at a later convenience.
   - *An original whose owner is unknown* is not the caller's to erase or release at all. The
-    `dhcp_opt_list` nodes returned by [`platform_hal_GetDhcpv4_Options`](../../include/platform_hal.h#L2458) and
-    [`platform_hal_GetDhcpv6_Options`](../../include/platform_hal.h#L2494) and the
-    [`PLAT_PROC_MEM_INFO`](../../include/platform_hal.h#L288) array that
-    [`platform_hal_GetMemoryPaths`](../../include/platform_hal.h#L2391) allocates have no stated owner, so a caller copies
+    `dhcp_opt_list` nodes returned by [`platform_hal_GetDhcpv4_Options`](../../include/platform_hal.h#L2542) and
+    [`platform_hal_GetDhcpv6_Options`](../../include/platform_hal.h#L2589) and the
+    [`PLAT_PROC_MEM_INFO`](../../include/platform_hal.h#L286) array that
+    [`platform_hal_GetMemoryPaths`](../../include/platform_hal.h#L2415) allocates have no stated owner, so a caller copies
     what it needs, protects the copy and erases the copy.
 
   All of this holds on the failure path, where a caller-allocated buffer may hold part of a value.
@@ -538,19 +538,19 @@ redaction helper and no secure-buffer type, so nothing enforces them mechanicall
   output contents — which on failure are undefined in any case, so what would be logged is as
   likely to be a fragment of a previous value as anything else. This applies to the structured
   outputs as much as to the string ones: on a failed
-  [`platform_hal_getDscpClientList`](../../include/platform_hal.h#L2791) neither the client array nor `numClients` is
+  [`platform_hal_getDscpClientList`](../../include/platform_hal.h#L2888) neither the client array nor `numClients` is
   defined, so neither may be read for a diagnostic, and on a failed
-  [`platform_hal_GetDhcpv4_Options`](../../include/platform_hal.h#L2458) or
-  [`platform_hal_GetDhcpv6_Options`](../../include/platform_hal.h#L2494) the returned list pointers are not defined and
+  [`platform_hal_GetDhcpv4_Options`](../../include/platform_hal.h#L2542) or
+  [`platform_hal_GetDhcpv6_Options`](../../include/platform_hal.h#L2589) the returned list pointers are not defined and
   must not be walked to describe what went wrong.
 - **What may be logged, stated positively.** The identity of the call, the `RETURN_OK` or
-  `RETURN_ERR` it returned, the [`WAN_INTERFACE`](../../include/platform_hal.h#L2621) and
-  [`TRAFFIC_CNT_COMMAND`](../../include/platform_hal.h#L2633) selectors, the `dscp_value` [`:2661`](../../include/platform_hal.h#L2661) and
-  `numClients` [`:2662`](../../include/platform_hal.h#L2662) members of an element with the `numElements`
-  [`:2809`](../../include/platform_hal.h#L2809) count above them, the `ip_version` [`:3172`](../../include/platform_hal.h#L3172), `src_port`
-  [`:3218`](../../include/platform_hal.h#L3218), `dest_port` [`:3207`](../../include/platform_hal.h#L3207), `protocol` [`:3226`](../../include/platform_hal.h#L3226)
-  and `dscp_value` [`:3235`](../../include/platform_hal.h#L3235) members of a flow description, and the `dhcp_opt` code
-  [`:2431`](../../include/platform_hal.h#L2431) without its value are none of them protected values, and recording them
+  `RETURN_ERR` it returned, the [`WAN_INTERFACE`](../../include/platform_hal.h#L2720) and
+  [`TRAFFIC_CNT_COMMAND`](../../include/platform_hal.h#L2732) selectors, the `dscp_value` [`:2756`](../../include/platform_hal.h#L2756) and
+  `numClients` [`:2757`](../../include/platform_hal.h#L2757) members of an element with the `numElements`
+  [`:2771`](../../include/platform_hal.h#L2771) count above them, the `ip_version` [`:3224`](../../include/platform_hal.h#L3224), `src_port`
+  [`:3270`](../../include/platform_hal.h#L3270), `dest_port` [`:3259`](../../include/platform_hal.h#L3259), `protocol` [`:3278`](../../include/platform_hal.h#L3278)
+  and `dscp_value` [`:3287`](../../include/platform_hal.h#L3287) members of a flow description, and the `dhcp_opt` code
+  [`:2468`](../../include/platform_hal.h#L2468) without its value are none of them protected values, and recording them
   with the timestamp and level the format above requires is
   the intended way to make a failure diagnosable without disclosure. Two qualifications: a port and
   a protocol identify a service rather than a person only while they are not published beside the
@@ -568,21 +568,21 @@ redaction helper and no secure-buffer type, so nothing enforces them mechanicall
 standard log levels; the absence of any log file declaration in `include/platform_hal.h` and in
 this repository for the statement that none is specified. The inventory above is derived from the
 declarations and structure definitions themselves —
-[`platform_hal_GetSerialNumber`](../../include/platform_hal.h#L811),
-[`platform_hal_GetBaseMacAddress`](../../include/platform_hal.h#L996),
-[`platform_hal_getCMTSMac`](../../include/platform_hal.h#L2598),
-[`platform_hal_GetPppUserName`](../../include/platform_hal.h#L3033),
-[`platform_hal_GetPppPassword`](../../include/platform_hal.h#L3081),
-[`dhcp_opt_list`](../../include/platform_hal.h#L2409), [`Traffic_client_t`](../../include/platform_hal.h#L2646) and
-[`hal_network_params_t`](../../include/platform_hal.h#L3201) — rather than from the accessor briefs, because a brief
+[`platform_hal_GetSerialNumber`](../../include/platform_hal.h#L809),
+[`platform_hal_GetBaseMacAddress`](../../include/platform_hal.h#L999),
+[`platform_hal_getCMTSMac`](../../include/platform_hal.h#L2697),
+[`platform_hal_GetPppUserName`](../../include/platform_hal.h#L3127),
+[`platform_hal_GetPppPassword`](../../include/platform_hal.h#L3168),
+[`dhcp_opt_list`](../../include/platform_hal.h#L2486), [`Traffic_client_t`](../../include/platform_hal.h#L2745) and
+[`hal_network_params_t`](../../include/platform_hal.h#L3288) — rather than from the accessor briefs, because a brief
 summarises what a call is for while the definition is what a caller supplies or receives. Four of
 the nine declarations restate the requirement in full on their own `@warning`, and they are the
 four linked above: the serial number, the base `MAC` address, the `PPP` user name and the `PPP`
-password. Five do not — [`platform_hal_getCMTSMac`](../../include/platform_hal.h#L2598), whose only `@warning` concerns
-the buffer size; [`platform_hal_getDscpClientList`](../../include/platform_hal.h#L2791) and
-[`platform_hal_qos_apply`](../../include/platform_hal.h#L3248), which carry no `@warning` at all; and
-[`platform_hal_GetDhcpv4_Options`](../../include/platform_hal.h#L2458) and
-[`platform_hal_GetDhcpv6_Options`](../../include/platform_hal.h#L2494), whose warnings address list ownership only — so
+password. Five do not — [`platform_hal_getCMTSMac`](../../include/platform_hal.h#L2697), whose only `@warning` concerns
+the buffer size; [`platform_hal_getDscpClientList`](../../include/platform_hal.h#L2888) and
+[`platform_hal_qos_apply`](../../include/platform_hal.h#L3332), which carry no `@warning` at all; and
+[`platform_hal_GetDhcpv4_Options`](../../include/platform_hal.h#L2542) and
+[`platform_hal_GetDhcpv6_Options`](../../include/platform_hal.h#L2589), whose warnings address list ownership only — so
 for the `CMTS` `MAC` address, the client `MAC` addresses and their counters, the flow endpoints and
 the `DHCP` option values this topic is the only place the requirement is stated, and a reader of
 those five declarations alone will not find it there.*
@@ -598,9 +598,9 @@ memory, on allocation size or on CPU utilization is declared by `include/platfor
 anywhere else in this repository, so none is stated here and a caller must not assume one.
 
 Two bounded costs are declared and are the figures a caller can size against. The fixed-capacity
-output structure [`DSCP_list_t`](../../include/platform_hal.h#L2674) holds up to 64
-[`DSCP_Element_t`](../../include/platform_hal.h#L2660) entries, each holding up to 256
-[`Traffic_client_t`](../../include/platform_hal.h#L2646) entries, and the caller allocates the
+output structure [`DSCP_list_t`](../../include/platform_hal.h#L2773) holds up to 64
+[`DSCP_Element_t`](../../include/platform_hal.h#L2759) entries, each holding up to 256
+[`Traffic_client_t`](../../include/platform_hal.h#L2745) entries, and the caller allocates the
 whole structure including both arrays; that single allocation dominates the memory cost of this
 interface. And every string output has a per-function documented minimum buffer size.
 
@@ -758,12 +758,12 @@ functional grouping does:
   identity. The three boot-time initialization functions prepare vendor-internal state; they
   return no handle, and nothing a caller holds refers to that state.
 - **Usage.** The caller allocates the structures the interface fills \-
-  [`LEDMGMT_PARAMS`](../../include/platform_hal.h#L1485),
-  [`THERMAL_PLATFORM_CONFIG`](../../include/platform_hal.h#L1788),
-  [`FW_BANK_INFO`](../../include/platform_hal.h#L2862),
-  [`INTF_STATS`](../../include/platform_hal.h#L2936),
-  [`DSCP_list_t`](../../include/platform_hal.h#L2674),
-  [`hal_network_params_t`](../../include/platform_hal.h#L3201) \- and owns them for their whole
+  [`LEDMGMT_PARAMS`](../../include/platform_hal.h#L1518),
+  [`THERMAL_PLATFORM_CONFIG`](../../include/platform_hal.h#L1826),
+  [`FW_BANK_INFO`](../../include/platform_hal.h#L2965),
+  [`INTF_STATS`](../../include/platform_hal.h#L3040),
+  [`DSCP_list_t`](../../include/platform_hal.h#L2773),
+  [`hal_network_params_t`](../../include/platform_hal.h#L3288) \- and owns them for their whole
   lifetime. The implementation reads or fills them during the call; whether it retains the pointer
   afterwards is not stated by this interface, so a caller keeps each structure valid for as long as
   it uses this interface rather than assuming the pointer is discarded when the call returns.
@@ -772,15 +772,15 @@ functional grouping does:
   at initialization persists for the lifetime of the process and is not releasable through this
   interface. A caller must not look for a counterpart to the initialization calls.
 - **The one exception to caller allocation.**
-  [`platform_hal_GetMemoryPaths`](../../include/platform_hal.h#L2391) allocates a
-  [`PLAT_PROC_MEM_INFO`](../../include/platform_hal.h#L288) array and returns it through a
+  [`platform_hal_GetMemoryPaths`](../../include/platform_hal.h#L2415) allocates a
+  [`PLAT_PROC_MEM_INFO`](../../include/platform_hal.h#L286) array and returns it through a
   caller-held pointer. Its declaration documents this asymmetry explicitly.
 - **Identifiers.** The interface addresses hardware by small integer index rather than by object
   identity: a fan index, an Ethernet port number, a radio index, an LED index bounded by
-  [`LED_BUFFER_SIZE`](../../include/platform_hal.h#L1450), a processor selected by
-  [`RDK_CPUS`](../../include/platform_hal.h#L249), a firmware bank selected by
-  [`FW_BANK`](../../include/platform_hal.h#L2848) and a WAN interface selected by
-  [`WAN_INTERFACE`](../../include/platform_hal.h#L2621).
+  [`LED_BUFFER_SIZE`](../../include/platform_hal.h#L1468), a processor selected by
+  [`RDK_CPUS`](../../include/platform_hal.h#L247), a firmware bank selected by
+  [`FW_BANK`](../../include/platform_hal.h#L2948) and a WAN interface selected by
+  [`WAN_INTERFACE`](../../include/platform_hal.h#L2720).
 
 #### Method Sequencing
 
@@ -807,7 +807,7 @@ functional grouping does:
 
 #### State-Dependent Behavior
 
-- **Configuration progress.** [`platform_hal_GetDeviceConfigStatus`](../../include/platform_hal.h#L334)
+- **Configuration progress.** [`platform_hal_GetDeviceConfigStatus`](../../include/platform_hal.h#L337)
   reports how far the device has progressed through its configuration sequence, returning one of
   the tokens `WaitForImplement`, `In Progress` or `Complete`. A caller uses it to decide whether
   configuration-dependent work may proceed.
@@ -840,35 +840,35 @@ Handling** for which function returns which.
 
 | Define | Value | Meaning |
 | --- | --- | --- |
-| [`RETURN_OK`](../../include/platform_hal.h#L163) | 0 | The operation completed successfully. |
-| [`RETURN_ERR`](../../include/platform_hal.h#L173) | -1 | The operation failed; no cause is reported. |
-| [`RETURN_UNSUPPORTED`](../../include/platform_hal.h#L185) | -2 | The platform does not implement the function. Permanent; six thermal functions only. |
+| [`RETURN_OK`](../../include/platform_hal.h#L161) | 0 | The operation completed successfully. |
+| [`RETURN_ERR`](../../include/platform_hal.h#L171) | -1 | The operation failed; no cause is reported. |
+| [`RETURN_UNSUPPORTED`](../../include/platform_hal.h#L183) | -2 | The platform does not implement the function. Permanent; six thermal functions only. |
 
 **Primitive type aliases.** This interface expresses its signatures in aliases rather than in the
 underlying C types, so a caller reading a declaration needs them:
-[`CHAR`](../../include/platform_hal.h#L111) for `char`,
-[`UCHAR`](../../include/platform_hal.h#L115) for `unsigned char`,
-[`BOOLEAN`](../../include/platform_hal.h#L119) for `unsigned char` carrying
-[`TRUE`](../../include/platform_hal.h#L151) or [`FALSE`](../../include/platform_hal.h#L155),
-[`INT`](../../include/platform_hal.h#L123) for `int`,
-[`UINT`](../../include/platform_hal.h#L127) for `unsigned int`,
-[`ULONG`](../../include/platform_hal.h#L131) for `unsigned long`, and the fixed-width aliases
-[`UINT8_t`](../../include/platform_hal.h#L135),
-[`UINT16_t`](../../include/platform_hal.h#L139),
-[`UINT32_t`](../../include/platform_hal.h#L143) and
-[`UINT64_t`](../../include/platform_hal.h#L147).
-[`ENABLE`](../../include/platform_hal.h#L159) is also defined, and its own comment records that no
+[`CHAR`](../../include/platform_hal.h#L109) for `char`,
+[`UCHAR`](../../include/platform_hal.h#L113) for `unsigned char`,
+[`BOOLEAN`](../../include/platform_hal.h#L117) for `unsigned char` carrying
+[`TRUE`](../../include/platform_hal.h#L149) or [`FALSE`](../../include/platform_hal.h#L153),
+[`INT`](../../include/platform_hal.h#L121) for `int`,
+[`UINT`](../../include/platform_hal.h#L125) for `unsigned int`,
+[`ULONG`](../../include/platform_hal.h#L129) for `unsigned long`, and the fixed-width aliases
+[`UINT8_t`](../../include/platform_hal.h#L133),
+[`UINT16_t`](../../include/platform_hal.h#L137),
+[`UINT32_t`](../../include/platform_hal.h#L141) and
+[`UINT64_t`](../../include/platform_hal.h#L145).
+[`ENABLE`](../../include/platform_hal.h#L157) is also defined, and its own comment records that no
 declaration in the header refers to it.
 
-**Buffer and capacity limits.** [`FW_NAME_MAX_LEN`](../../include/platform_hal.h#L220) 64 and
-[`FW_STATE_MAX_LEN`](../../include/platform_hal.h#L221) 64 size the firmware bank strings;
-[`PLAT_PROC_MEM_MAX_LEN`](../../include/platform_hal.h#L252) 40 sizes each memory path string;
-[`LED_BUFFER_SIZE`](../../include/platform_hal.h#L1450) 3 is the number of LED entries a caller
+**Buffer and capacity limits.** [`FW_NAME_MAX_LEN`](../../include/platform_hal.h#L218) 64 and
+[`FW_STATE_MAX_LEN`](../../include/platform_hal.h#L219) 64 size the firmware bank strings;
+[`PLAT_PROC_MEM_MAX_LEN`](../../include/platform_hal.h#L250) 40 sizes each memory path string;
+[`LED_BUFFER_SIZE`](../../include/platform_hal.h#L1468) 3 is the number of LED entries a caller
 may address. Functions that write a string into a caller buffer state their own minimum size on
 the declaration rather than through a macro.
 
-**DHCP option codes.** [`DHCPV6_OPT_3`](../../include/platform_hal.h#L189) onwards and the
-DHCPv4 set ending at [`DHCPV4_OPT_END`](../../include/platform_hal.h#L218), value 255, are the
+**DHCP option codes.** [`DHCPV6_OPT_3`](../../include/platform_hal.h#L187) onwards and the
+DHCPv4 set ending at [`DHCPV4_OPT_END`](../../include/platform_hal.h#L216), value 255, are the
 codes carried in the `dhcp_opt` member of `dhcp_opt_list`. `DHCPV4_OPT_END` is the sentinel used
 to check whether an option is valid.
 
@@ -879,23 +879,23 @@ to check whether an option is valid.
 | `RDK_CPUS` | [`:247`](../../include/platform_hal.h#L247) | Processor selector: `HOST_CPU`, `PEER_CPU`, `NOT_SUPPORTED_CPU`. Argument to `platform_hal_GetMemoryPaths`. |
 | `PLAT_PROC_MEM_INFO` | [`:286`](../../include/platform_hal.h#L286) | DRAM and three eMMC storage paths for one processor, each bounded by `PLAT_PROC_MEM_MAX_LEN`. Allocated by the HAL, not by the caller. |
 | `LED_COLOR` | [`:1483`](../../include/platform_hal.h#L1483) | LED colour selector, from `LED_WHITE` through the combined colours to `NOT_SUPPORTED`. |
-| `LEDMGMT_PARAMS` | [`:1503`](../../include/platform_hal.h#L1503) | LED configuration: colour, state \- solid or blink \- and blink interval in seconds. Its `led_name` and `led_param` members exist only when `FEATURE_RDKB_LED_MANAGER` is defined. |
-| `FAN_SPEED` | [`:1792`](../../include/platform_hal.h#L1792) | Discrete fan speed setting: `FAN_SPEED_OFF`, `FAN_SPEED_SLOW`, `FAN_SPEED_MEDIUM`, `FAN_SPEED_FAST`, `FAN_SPEED_MAX`. Thermal flag only. |
-| `THERMAL_PLATFORM_CONFIG` | [`:1811`](../../include/platform_hal.h#L1811) | Platform fan configuration: fan count, the three temperature thresholds, minimum run time, monitoring delay, power monitoring and log interval. Thermal flag only. |
-| `FAN_ERR` | [`:1984`](../../include/platform_hal.h#L1984) | Fan operation error state: `FAN_ERR_NONE`, `FAN_ERR_HW`, `FAN_ERR_MAX_OVERRIDE_SET`. Thermal flag only. |
-| `dhcp_opt_list` | [`:2430`](../../include/platform_hal.h#L2430) | Singly linked list node carrying one DHCPv4 or DHCPv6 option code and its value. |
-| `PSM_STATE` | [`:2566`](../../include/platform_hal.h#L2566) | Power saving mode state: `PSM_UNKNOWN`, `PSM_AC`, `PSM_BATT`, `PSM_HOT`, `PSM_COOLED`, `PSM_NOT_SUPPORTED`. Data-model state only. |
-| `WAN_INTERFACE` | [`:2668`](../../include/platform_hal.h#L2668) | WAN interface selector for DSCP traffic counting: `DOCSIS`, `EWAN`. |
-| `TRAFFIC_CNT_COMMAND` | [`:2680`](../../include/platform_hal.h#L2680) | Start or stop selector for DSCP traffic counting: `TRAFFIC_CNT_START`, `TRAFFIC_CNT_STOP`. |
-| `Traffic_client_t` | [`:2693`](../../include/platform_hal.h#L2693) | Byte counters for one client against a single DSCP value, with the client MAC address. |
-| `DSCP_Element_t` | [`:2707`](../../include/platform_hal.h#L2707) | One DSCP value with its client count and a fixed array of up to 256 client entries; only the first `numClients` are meaningful. |
-| `DSCP_list_t` | [`:2721`](../../include/platform_hal.h#L2721) | Complete DSCP counting result for one WAN interface: up to 64 elements, of which only the first `numElements` are meaningful. |
-| `FW_BANK` | [`:2848`](../../include/platform_hal.h#L2848) | Firmware bank selector: `ACTIVE_BANK`, `INACTIVE_BANK`. |
-| `FW_BANK_INFO` | [`:2913`](../../include/platform_hal.h#L2913) | Firmware image name and trial-boot state for one bank, as zero-terminated strings. |
-| `INTF_STATS` | [`:2988`](../../include/platform_hal.h#L2988) | Packet and byte counters for one network interface, covering LAN-to-WAN and WAN-to-LAN traffic only. |
-| `ip_version_t` | [`:3134-3137`](../../include/platform_hal.h#L3102) | IP version selector for QoS parameters: `IP_VERSION_IPV4`, `IP_VERSION_IPV6`. |
-| `net_proto_t` | [`:3145-3148`](../../include/platform_hal.h#L3113) | Transport protocol selector for QoS parameters: `PROTOCOL_TCP`, `PROTOCOL_UDP`. |
-| `hal_network_params_t` | [`:3236`](../../include/platform_hal.h#L3236) | The QoS and traffic management parameter set: source and destination MAC and IP addresses, ports, protocol and DSCP value. |
+| `LEDMGMT_PARAMS` | [`:1518`](../../include/platform_hal.h#L1518) | LED configuration: colour, state \- solid or blink \- and blink interval in seconds. Its `led_name` and `led_param` members exist only when `FEATURE_RDKB_LED_MANAGER` is defined. |
+| `FAN_SPEED` | [`:1807`](../../include/platform_hal.h#L1807) | Discrete fan speed setting: `FAN_SPEED_OFF`, `FAN_SPEED_SLOW`, `FAN_SPEED_MEDIUM`, `FAN_SPEED_FAST`, `FAN_SPEED_MAX`. Thermal flag only. |
+| `THERMAL_PLATFORM_CONFIG` | [`:1826`](../../include/platform_hal.h#L1826) | Platform fan configuration: fan count, the three temperature thresholds, minimum run time, monitoring delay, power monitoring and log interval. Thermal flag only. |
+| `FAN_ERR` | [`:1925`](../../include/platform_hal.h#L1925) | Fan operation error state: `FAN_ERR_NONE`, `FAN_ERR_HW`, `FAN_ERR_MAX_OVERRIDE_SET`. Thermal flag only. |
+| `dhcp_opt_list` | [`:2486`](../../include/platform_hal.h#L2486) | Singly linked list node carrying one DHCPv4 or DHCPv6 option code and its value. |
+| `PSM_STATE` | [`:2618`](../../include/platform_hal.h#L2618) | Power saving mode state: `PSM_UNKNOWN`, `PSM_AC`, `PSM_BATT`, `PSM_HOT`, `PSM_COOLED`, `PSM_NOT_SUPPORTED`. Data-model state only. |
+| `WAN_INTERFACE` | [`:2720`](../../include/platform_hal.h#L2720) | WAN interface selector for DSCP traffic counting: `DOCSIS`, `EWAN`. |
+| `TRAFFIC_CNT_COMMAND` | [`:2732`](../../include/platform_hal.h#L2732) | Start or stop selector for DSCP traffic counting: `TRAFFIC_CNT_START`, `TRAFFIC_CNT_STOP`. |
+| `Traffic_client_t` | [`:2745`](../../include/platform_hal.h#L2745) | Byte counters for one client against a single DSCP value, with the client MAC address. |
+| `DSCP_Element_t` | [`:2759`](../../include/platform_hal.h#L2759) | One DSCP value with its client count and a fixed array of up to 256 client entries; only the first `numClients` are meaningful. |
+| `DSCP_list_t` | [`:2773`](../../include/platform_hal.h#L2773) | Complete DSCP counting result for one WAN interface: up to 64 elements, of which only the first `numElements` are meaningful. |
+| `FW_BANK` | [`:2948`](../../include/platform_hal.h#L2948) | Firmware bank selector: `ACTIVE_BANK`, `INACTIVE_BANK`. |
+| `FW_BANK_INFO` | [`:2965`](../../include/platform_hal.h#L2965) | Firmware image name and trial-boot state for one bank, as zero-terminated strings. |
+| `INTF_STATS` | [`:3040`](../../include/platform_hal.h#L3040) | Packet and byte counters for one network interface, covering LAN-to-WAN and WAN-to-LAN traffic only. |
+| `ip_version_t` | [`:3189`](../../include/platform_hal.h#L3189) | IP version selector for QoS parameters: `IP_VERSION_IPV4`, `IP_VERSION_IPV6`. |
+| `net_proto_t` | [`:3200`](../../include/platform_hal.h#L3200) | Transport protocol selector for QoS parameters: `PROTOCOL_TCP`, `PROTOCOL_UDP`. |
+| `hal_network_params_t` | [`:3288`](../../include/platform_hal.h#L3288) | The QoS and traffic management parameter set: source and destination MAC and IP addresses, ports, protocol and DSCP value. |
 
 Each of these types also carries a pointer alias where the interface uses one, for example
 `PLEDMGMT_PARAMS`, `PPLAT_PROC_MEM_INFO`, `PPSM_STATE`, `PFW_BANK_INFO`, `PINTF_STATS`,
@@ -932,16 +932,16 @@ be found only here and in the header itself.
 
 | Function | Purpose |
 | --- | --- |
-| [`platform_hal_GetDeviceConfigStatus`](../../include/platform_hal.h#L334) | Reports how far the device has progressed through its configuration sequence. |
-| [`platform_hal_GetTelnetEnable`](../../include/platform_hal.h#L362) | Reports whether Telnet access is currently enabled. |
-| [`platform_hal_SetTelnetEnable`](../../include/platform_hal.h#L387) | Enables or disables Telnet access. |
-| [`platform_hal_GetSSHEnable`](../../include/platform_hal.h#L415) | Reports whether SSH access is currently enabled. |
-| [`platform_hal_SetSSHEnable`](../../include/platform_hal.h#L440) | Enables or disables SSH access. |
-| [`platform_hal_GetSNMPEnable`](../../include/platform_hal.h#L470) | Reports which interface scope SNMP is currently enabled for. |
-| [`platform_hal_SetSNMPEnable`](../../include/platform_hal.h#L501) | Selects the interface scope SNMP is enabled for. |
-| [`platform_hal_SetSNMPOnboardRebootEnable`](../../include/platform_hal.h#L2172) | Allows or suppresses SNMP-initiated reboots during onboarding. |
-| [`platform_hal_GetWebUITimeout`](../../include/platform_hal.h#L529) | Reports the configured web user-interface inactivity timeout. |
-| [`platform_hal_SetWebUITimeout`](../../include/platform_hal.h#L554) | Sets the web user-interface inactivity timeout. |
+| [`platform_hal_GetDeviceConfigStatus`](../../include/platform_hal.h#L337) | Reports how far the device has progressed through its configuration sequence. |
+| [`platform_hal_GetTelnetEnable`](../../include/platform_hal.h#L363) | Reports whether Telnet access is currently enabled. |
+| [`platform_hal_SetTelnetEnable`](../../include/platform_hal.h#L388) | Enables or disables Telnet access. |
+| [`platform_hal_GetSSHEnable`](../../include/platform_hal.h#L414) | Reports whether SSH access is currently enabled. |
+| [`platform_hal_SetSSHEnable`](../../include/platform_hal.h#L439) | Enables or disables SSH access. |
+| [`platform_hal_GetSNMPEnable`](../../include/platform_hal.h#L473) | Reports which interface scope SNMP is currently enabled for. |
+| [`platform_hal_SetSNMPEnable`](../../include/platform_hal.h#L504) | Selects the interface scope SNMP is enabled for. |
+| [`platform_hal_SetSNMPOnboardRebootEnable`](../../include/platform_hal.h#L2199) | Allows or suppresses SNMP-initiated reboots during onboarding. |
+| [`platform_hal_GetWebUITimeout`](../../include/platform_hal.h#L530) | Reports the configured web user-interface inactivity timeout. |
+| [`platform_hal_SetWebUITimeout`](../../include/platform_hal.h#L555) | Sets the web user-interface inactivity timeout. |
 | [`platform_hal_GetWebAccessLevel`](../../include/platform_hal.h#L590) | Reads the web access level granted to a user on an interface. |
 | [`platform_hal_SetWebAccessLevel`](../../include/platform_hal.h#L638) | Sets the web access level granted to a user on an interface. |
 
@@ -949,103 +949,103 @@ be found only here and in the header itself.
 
 | Function | Purpose |
 | --- | --- |
-| [`platform_hal_GetModelName`](../../include/platform_hal.h#L729) | Reads the device model name. |
-| [`platform_hal_GetRouterRegion`](../../include/platform_hal.h#L763) | Reads the regulatory region the router is provisioned for. |
-| [`platform_hal_GetSerialNumber`](../../include/platform_hal.h#L811) | Reads the device serial number. |
-| [`platform_hal_GetHardwareVersion`](../../include/platform_hal.h#L846) | Reads the hardware revision of the device. |
-| [`platform_hal_GetSoftwareVersion`](../../include/platform_hal.h#L879) | Reads the software version currently flashed on the device. |
-| [`platform_hal_GetBootloaderVersion`](../../include/platform_hal.h#L912) | Reads the bootloader version currently flashed on the device. |
-| [`platform_hal_GetFirmwareName`](../../include/platform_hal.h#L946) | Reads the name of the firmware image flashed on the device. |
-| [`platform_hal_GetBaseMacAddress`](../../include/platform_hal.h#L996) | Reads the base MAC address of the device. |
-| [`platform_hal_GetFirmwareBankInfo`](../../include/platform_hal.h#L2907) | Reads the firmware image name and state held in a given bank. |
+| [`platform_hal_GetModelName`](../../include/platform_hal.h#L732) | Reads the device model name. |
+| [`platform_hal_GetRouterRegion`](../../include/platform_hal.h#L770) | Reads the regulatory region the router is provisioned for. |
+| [`platform_hal_GetSerialNumber`](../../include/platform_hal.h#L809) | Reads the device serial number. |
+| [`platform_hal_GetHardwareVersion`](../../include/platform_hal.h#L849) | Reads the hardware revision of the device. |
+| [`platform_hal_GetSoftwareVersion`](../../include/platform_hal.h#L887) | Reads the software version currently flashed on the device. |
+| [`platform_hal_GetBootloaderVersion`](../../include/platform_hal.h#L925) | Reads the bootloader version currently flashed on the device. |
+| [`platform_hal_GetFirmwareName`](../../include/platform_hal.h#L964) | Reads the name of the firmware image flashed on the device. |
+| [`platform_hal_GetBaseMacAddress`](../../include/platform_hal.h#L999) | Reads the base MAC address of the device. |
+| [`platform_hal_GetFirmwareBankInfo`](../../include/platform_hal.h#L3011) | Reads the firmware image name and state held in a given bank. |
 
 **Flash and memory inventory:**
 
 | Function | Purpose |
 | --- | --- |
-| [`platform_hal_GetHardware`](../../include/platform_hal.h#L1031) | Reads the total flash size of the device in megabytes. |
-| [`platform_hal_GetHardware_MemUsed`](../../include/platform_hal.h#L1065) | Reads the used flash size of the device in megabytes. |
-| [`platform_hal_GetHardware_MemFree`](../../include/platform_hal.h#L1099) | Reads the available flash size of the device in megabytes. |
-| [`platform_hal_GetTotalMemorySize`](../../include/platform_hal.h#L1129) | Reads the total DRAM size of the device in megabytes. |
-| [`platform_hal_GetUsedMemorySize`](../../include/platform_hal.h#L1159) | Reads the DRAM currently in use, in megabytes. |
-| [`platform_hal_GetFreeMemorySize`](../../include/platform_hal.h#L1189) | Reads the DRAM currently free, in megabytes. |
-| [`platform_hal_GetMemoryPaths`](../../include/platform_hal.h#L2391) | Reads the DRAM and eMMC storage paths of a given processor. Allocates its own output. |
-| [`platform_hal_GetCPUSpeed`](../../include/platform_hal.h#L2827) | Reads the processor speed in bogomips. |
+| [`platform_hal_GetHardware`](../../include/platform_hal.h#L1039) | Reads the total flash size of the device in megabytes. |
+| [`platform_hal_GetHardware_MemUsed`](../../include/platform_hal.h#L1078) | Reads the used flash size of the device in megabytes. |
+| [`platform_hal_GetHardware_MemFree`](../../include/platform_hal.h#L1111) | Reads the available flash size of the device in megabytes. |
+| [`platform_hal_GetTotalMemorySize`](../../include/platform_hal.h#L1140) | Reads the total DRAM size of the device in megabytes. |
+| [`platform_hal_GetUsedMemorySize`](../../include/platform_hal.h#L1169) | Reads the DRAM currently in use, in megabytes. |
+| [`platform_hal_GetFreeMemorySize`](../../include/platform_hal.h#L1198) | Reads the DRAM currently free, in megabytes. |
+| [`platform_hal_GetMemoryPaths`](../../include/platform_hal.h#L2415) | Reads the DRAM and eMMC storage paths of a given processor. Allocates its own output. |
+| [`platform_hal_GetCPUSpeed`](../../include/platform_hal.h#L2927) | Reads the processor speed in bogomips. |
 
 **Factory state, reset and image validity:**
 
 | Function | Purpose |
 | --- | --- |
-| [`platform_hal_GetFactoryResetCount`](../../include/platform_hal.h#L1219) | Reads how many times the device has been factory reset. |
-| [`platform_hal_ClearResetCount`](../../include/platform_hal.h#L1244) | Clears the factory reset counter. |
-| [`platform_hal_getTimeOffSet`](../../include/platform_hal.h#L1285) | Reads the device's time offset from UTC. |
-| [`platform_hal_SetDeviceCodeImageTimeout`](../../include/platform_hal.h#L1310) | Sets the hardware watchdog timeout. |
-| [`platform_hal_SetDeviceCodeImageValid`](../../include/platform_hal.h#L1337) | Marks the flashed firmware image valid or invalid. |
-| [`platform_hal_getFactoryPartnerId`](../../include/platform_hal.h#L1372) | Reads the factory-programmed partner identifier. |
-| [`platform_hal_getFactoryCmVariant`](../../include/platform_hal.h#L1407) | Reads the factory-programmed cable-modem variant. |
-| [`platform_hal_setFactoryCmVariant`](../../include/platform_hal.h#L1439) | Sets the factory-programmed cable-modem variant. |
+| [`platform_hal_GetFactoryResetCount`](../../include/platform_hal.h#L1227) | Reads how many times the device has been factory reset. |
+| [`platform_hal_ClearResetCount`](../../include/platform_hal.h#L1252) | Clears the factory reset counter. |
+| [`platform_hal_getTimeOffSet`](../../include/platform_hal.h#L1293) | Reads the device's time offset from UTC. |
+| [`platform_hal_SetDeviceCodeImageTimeout`](../../include/platform_hal.h#L1318) | Sets the hardware watchdog timeout. |
+| [`platform_hal_SetDeviceCodeImageValid`](../../include/platform_hal.h#L1345) | Marks the flashed firmware image valid or invalid. |
+| [`platform_hal_getFactoryPartnerId`](../../include/platform_hal.h#L1385) | Reads the factory-programmed partner identifier. |
+| [`platform_hal_getFactoryCmVariant`](../../include/platform_hal.h#L1425) | Reads the factory-programmed cable-modem variant. |
+| [`platform_hal_setFactoryCmVariant`](../../include/platform_hal.h#L1457) | Sets the factory-programmed cable-modem variant. |
 
 **LED control:**
 
 | Function | Purpose |
 | --- | --- |
-| [`platform_hal_initLed`](../../include/platform_hal.h#L1537) | *flag* Initialises the LED layer and reports the path of its configuration file. |
-| [`platform_hal_setLed`](../../include/platform_hal.h#L1570) | Applies an LED configuration to the device. |
-| [`platform_hal_getLed`](../../include/platform_hal.h#L1602) | Reads the LED configuration in force at the time of the call. |
+| [`platform_hal_initLed`](../../include/platform_hal.h#L1574) | *flag* Initialises the LED layer and reports the path of its configuration file. |
+| [`platform_hal_setLed`](../../include/platform_hal.h#L1605) | Applies an LED configuration to the device. |
+| [`platform_hal_getLed`](../../include/platform_hal.h#L1636) | Reads the LED configuration in force at the time of the call. |
 
 **Fan control and readings:**
 
 | Function | Purpose |
 | --- | --- |
-| [`platform_hal_getFanSpeed`](../../include/platform_hal.h#L1632) | Reads the PWM-derived speed of a fan. Returns the reading, with no failure value. |
-| [`platform_hal_getRPM`](../../include/platform_hal.h#L1659) | Reads the rotation rate of a fan. Returns the reading, with no failure value. |
-| [`platform_hal_getRotorLock`](../../include/platform_hal.h#L1691) | Reads the rotor lock status of a fan: 1 locked, 0 unlocked, -1 not applicable. |
-| [`platform_hal_getFanStatus`](../../include/platform_hal.h#L1717) | Reads whether a fan is enabled. Returns the state, with no failure value. |
-| [`platform_hal_setFanMaxOverride`](../../include/platform_hal.h#L1746) | Forces a fan to maximum speed, or releases it back to normal control. |
-| [`platform_hal_setFanSpeed`](../../include/platform_hal.h#L1943) | *flag* Sets a fan to one of the platform's discrete speed settings. |
+| [`platform_hal_getFanSpeed`](../../include/platform_hal.h#L1666) | Reads the PWM-derived speed of a fan. Returns the reading, with no failure value. |
+| [`platform_hal_getRPM`](../../include/platform_hal.h#L1693) | Reads the rotation rate of a fan. Returns the reading, with no failure value. |
+| [`platform_hal_getRotorLock`](../../include/platform_hal.h#L1729) | Reads the rotor lock status of a fan: 1 locked, 0 unlocked, -1 not applicable. |
+| [`platform_hal_getFanStatus`](../../include/platform_hal.h#L1755) | Reads whether a fan is enabled. Returns the state, with no failure value. |
+| [`platform_hal_setFanMaxOverride`](../../include/platform_hal.h#L1784) | Forces a fan to maximum speed, or releases it back to normal control. |
+| [`platform_hal_setFanSpeed`](../../include/platform_hal.h#L1978) | *flag* Sets a fan to one of the platform's discrete speed settings. |
 
 **Thermal, power and ECO mode:**
 
 | Function | Purpose |
 | --- | --- |
-| [`platform_hal_initThermal`](../../include/platform_hal.h#L1835) | *flag* Initialises the thermal layer and reports the platform's fan configuration. |
-| [`platform_hal_LoadThermalConfig`](../../include/platform_hal.h#L1870) | *flag* Loads the default thermal thresholds into a configuration structure. |
-| [`platform_hal_getFanTemperature`](../../include/platform_hal.h#L1980) | *flag* Reads the current device temperature. |
-| [`platform_hal_getInputCurrent`](../../include/platform_hal.h#L2017) | *flag* Reads the platform's input current. |
-| [`platform_hal_getInputPower`](../../include/platform_hal.h#L2053) | *flag* Reads the platform's input power. |
-| [`platform_hal_getRadioTemperature`](../../include/platform_hal.h#L2096) | *flag* Reads the temperature of one radio module. |
-| [`platform_hal_getEcoModeStatus`](../../include/platform_hal.h#L2138) | *flag* Reads the ECO mode status of one radio module. |
-| [`platform_hal_SetLowPowerModeState`](../../include/platform_hal.h#L2565) | Sets the platform's power-saving mode state. |
+| [`platform_hal_initThermal`](../../include/platform_hal.h#L1872) | *flag* Initialises the thermal layer and reports the platform's fan configuration. |
+| [`platform_hal_LoadThermalConfig`](../../include/platform_hal.h#L1906) | *flag* Loads the default thermal thresholds into a configuration structure. |
+| [`platform_hal_getFanTemperature`](../../include/platform_hal.h#L2014) | *flag* Reads the current device temperature. |
+| [`platform_hal_getInputCurrent`](../../include/platform_hal.h#L2050) | *flag* Reads the platform's input current. |
+| [`platform_hal_getInputPower`](../../include/platform_hal.h#L2085) | *flag* Reads the platform's input power. |
+| [`platform_hal_getRadioTemperature`](../../include/platform_hal.h#L2127) | *flag* Reads the temperature of one radio module. |
+| [`platform_hal_getEcoModeStatus`](../../include/platform_hal.h#L2167) | *flag* Reads the ECO mode status of one radio module. |
+| [`platform_hal_SetLowPowerModeState`](../../include/platform_hal.h#L2659) | Sets the platform's power-saving mode state. |
 
 **MACsec:**
 
 | Function | Purpose |
 | --- | --- |
-| [`platform_hal_GetMACsecEnable`](../../include/platform_hal.h#L2214) | Reads whether MACsec is enabled on a port, administratively. |
-| [`platform_hal_SetMACsecEnable`](../../include/platform_hal.h#L2246) | Enables or disables MACsec on a port. |
-| [`platform_hal_GetMACsecOperationalStatus`](../../include/platform_hal.h#L2287) | Reads whether MACsec is actually configured at the interface or driver level. |
-| [`platform_hal_StartMACsec`](../../include/platform_hal.h#L2321) | Starts MACsec on a port and waits for the outcome. |
-| [`platform_hal_StopMACsec`](../../include/platform_hal.h#L2350) | Stops MACsec on a port and waits for the outcome. |
+| [`platform_hal_GetMACsecEnable`](../../include/platform_hal.h#L2240) | Reads whether MACsec is enabled on a port, administratively. |
+| [`platform_hal_SetMACsecEnable`](../../include/platform_hal.h#L2272) | Enables or disables MACsec on a port. |
+| [`platform_hal_GetMACsecOperationalStatus`](../../include/platform_hal.h#L2311) | Reads whether MACsec is actually configured at the interface or driver level. |
+| [`platform_hal_StartMACsec`](../../include/platform_hal.h#L2345) | Starts MACsec on a port and waits for the outcome. |
+| [`platform_hal_StopMACsec`](../../include/platform_hal.h#L2374) | Stops MACsec on a port and waits for the outcome. |
 
 **WAN, DHCP options and PPP credentials:**
 
 | Function | Purpose |
 | --- | --- |
-| [`platform_hal_GetDhcpv4_Options`](../../include/platform_hal.h#L2458) | Reads the DHCPv4 options the platform requests and sends. |
-| [`platform_hal_GetDhcpv6_Options`](../../include/platform_hal.h#L2494) | Reads the DHCPv6 options the platform requests and sends. |
-| [`platform_hal_getCMTSMac`](../../include/platform_hal.h#L2598) | Reads the MAC address of the CMTS the device is attached to. |
-| [`platform_hal_GetInterfaceStats`](../../include/platform_hal.h#L2986) | Reads packet and byte counters for a named network interface. |
-| [`platform_hal_GetPppUserName`](../../include/platform_hal.h#L3033) | Reads the PPP username configured for the WAN connection. |
-| [`platform_hal_GetPppPassword`](../../include/platform_hal.h#L3081) | Reads the PPP password configured for the WAN connection. |
+| [`platform_hal_GetDhcpv4_Options`](../../include/platform_hal.h#L2542) | Reads the DHCPv4 options the platform requests and sends. |
+| [`platform_hal_GetDhcpv6_Options`](../../include/platform_hal.h#L2589) | Reads the DHCPv6 options the platform requests and sends. |
+| [`platform_hal_getCMTSMac`](../../include/platform_hal.h#L2697) | Reads the MAC address of the CMTS the device is attached to. |
+| [`platform_hal_GetInterfaceStats`](../../include/platform_hal.h#L3088) | Reads packet and byte counters for a named network interface. |
+| [`platform_hal_GetPppUserName`](../../include/platform_hal.h#L3127) | Reads the PPP username configured for the WAN connection. |
+| [`platform_hal_GetPppPassword`](../../include/platform_hal.h#L3168) | Reads the PPP password configured for the WAN connection. |
 
 **DSCP traffic counting and QoS:**
 
 | Function | Purpose |
 | --- | --- |
-| [`platform_hal_setDscp`](../../include/platform_hal.h#L2723) | Starts or stops per-client traffic counting for a set of DSCP values. |
-| [`platform_hal_resetDscpCounts`](../../include/platform_hal.h#L2753) | Resets the DSCP traffic counters for a WAN interface. |
-| [`platform_hal_getDscpClientList`](../../include/platform_hal.h#L2791) | Reads the accumulated DSCP traffic counters for a WAN interface. |
-| [`platform_hal_qos_apply`](../../include/platform_hal.h#L3248) | Applies QoS and traffic management settings from a network parameter set. |
+| [`platform_hal_setDscp`](../../include/platform_hal.h#L2822) | Starts or stops per-client traffic counting for a set of DSCP values. |
+| [`platform_hal_resetDscpCounts`](../../include/platform_hal.h#L2852) | Resets the DSCP traffic counters for a WAN interface. |
+| [`platform_hal_getDscpClientList`](../../include/platform_hal.h#L2888) | Reads the accumulated DSCP traffic counters for a WAN interface. |
+| [`platform_hal_qos_apply`](../../include/platform_hal.h#L3332) | Applies QoS and traffic management settings from a network parameter set. |
 
 *Source: the declarations and `@brief` content of `include/platform_hal.h`; the line references are
 the declaration lines in that file at the revision this document was written against.*
@@ -1117,20 +1117,20 @@ The status values this interface exposes are:
 - **Device configuration progress** \- `platform_hal_GetDeviceConfigStatus` reports one of the
   tokens `WaitForImplement`, `In Progress` or `Complete`. This interface does not state whether
   the sequence is monotonic or whether it can be re-entered.
-- **Power saving mode** \- [`PSM_STATE`](../../include/platform_hal.h#L2523) carries
+- **Power saving mode** \- [`PSM_STATE`](../../include/platform_hal.h#L2618) carries
   `PSM_UNKNOWN`, `PSM_AC`, `PSM_BATT`, `PSM_HOT`, `PSM_COOLED` or `PSM_NOT_SUPPORTED`. Its own
   documentation records that these are data-model state only.
 - **Fan state** \- `platform_hal_getFanStatus` reports enabled or disabled;
   `platform_hal_getRotorLock` reports 1, 0 or -1 for not applicable;
-  [`FAN_SPEED`](../../include/platform_hal.h#L1769) enumerates `FAN_SPEED_OFF`, `FAN_SPEED_SLOW`,
+  [`FAN_SPEED`](../../include/platform_hal.h#L1807) enumerates `FAN_SPEED_OFF`, `FAN_SPEED_SLOW`,
   `FAN_SPEED_MEDIUM`, `FAN_SPEED_FAST` and `FAN_SPEED_MAX`;
-  [`FAN_ERR`](../../include/platform_hal.h#L1889) enumerates `FAN_ERR_NONE`,
+  [`FAN_ERR`](../../include/platform_hal.h#L1925) enumerates `FAN_ERR_NONE`,
   `FAN_ERR_HW` and `FAN_ERR_MAX_OVERRIDE_SET`.
 - **MACsec state** \- `platform_hal_GetMACsecEnable` reports the administrative setting and
   `platform_hal_GetMACsecOperationalStatus` the operational one. This interface does not state how
   long after `platform_hal_StartMACsec` the operational state may be expected to follow the
   administrative one.
-- **Firmware bank state** \- [`FW_BANK_INFO`](../../include/platform_hal.h#L2862) carries a
+- **Firmware bank state** \- [`FW_BANK_INFO`](../../include/platform_hal.h#L2965) carries a
   `fw_state` string whose expected values are `confirmed` and `TrialBoot#0` through `TrialBoot#n`,
   where the upper bound is vendor specific. The interface does not define the transitions between
   a trial boot and a confirmed image.

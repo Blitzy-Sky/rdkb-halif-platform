@@ -118,19 +118,35 @@ resource against concurrent entry from more than one process.
 
 ### Memory Model
 
-All strings this interface exchanges are zero-terminated. Each function that writes a string into
-a caller buffer states the minimum buffer size on its declaration.
+A function that writes a string into a caller buffer either states a minimum buffer size on its
+declaration or takes a `maxSize` argument giving the size of the buffer supplied:
+`platform_hal_GetSoftwareVersion()`, `platform_hal_GetBootloaderVersion()`,
+`platform_hal_GetFirmwareName()`, `platform_hal_GetPppUserName()` and
+`platform_hal_GetPppPassword()`. A caller passes every string argument zero-terminated; a string
+output is zero-terminated only where its declaration says so, as for
+`platform_hal_GetBaseMacAddress()`.
 
 #### Caller Responsibilities
 
 - The caller allocates and releases every buffer and structure it passes to the interface, as each
   function's documentation specifies, and populates input structures fully.
-- The caller supplies each output buffer at least as large as the documented minimum size, because
-  string outputs take no length argument.
-- The caller keeps the storage it supplies valid until the call returns.
+- The caller supplies each output buffer at least as large as its documented minimum, and passes a
+  `maxSize` no larger than the buffer it actually allocated.
+- The caller bounds every read of a string output to the buffer size it supplied or the `maxSize`
+  it reported. Where it needs a terminated string from an output not declared zero-terminated, it
+  allocates one byte beyond the documented minimum, or reports a `maxSize` one byte short of its
+  allocation, and zeroes that spare byte before the call.
+- The caller keeps the storage it supplies valid during the call, and confirms with the vendor
+  implementation that the pointer is no longer held before it reuses, overwrites or releases that
+  storage.
 - For `platform_hal_GetMemoryPaths()` the caller supplies only a pointer variable: the HAL allocates
   the `PLAT_PROC_MEM_INFO` array and returns its address. After a failed call the caller does not
-  free that pointer.
+  free that pointer; after a successful call it agrees with the implementer which side releases
+  the array, and how, before relying on the result in a long-running process.
+- Before reading or freeing anything reached through the lists that
+  `platform_hal_GetDhcpv4_Options()` and `platform_hal_GetDhcpv6_Options()` return, the caller
+  agrees with the implementer how a list ends, how long each value is and which side releases the
+  nodes and their values.
 
 #### Module Responsibilities
 
@@ -159,9 +175,12 @@ interface counter, polls the function that reads it.
 - Every function is synchronous: the calling thread is blocked until the operation completes.
 - The initialization functions are expected to block while the hardware is not ready.
 - An implementation applies a timeout to any call that can fail through lack of a response.
-- `platform_hal_StartMACsec()` and `platform_hal_StopMACsec()` block until MACsec has started or
-  stopped on the port; the `timeoutSec` argument of `platform_hal_StartMACsec()` uses 0 to mean
-  retry forever. A caller does not invoke either function on a latency-sensitive path.
+- `platform_hal_StartMACsec()` and `platform_hal_StopMACsec()` block by design until the start or
+  stop operation on the port has an outcome, which may be failure. `platform_hal_StartMACsec()`
+  returns once MACsec has started or the operation gives up; its `timeoutSec` argument is
+  currently unused and is passed as 0, meaning retry forever. A caller does not invoke either
+  function on a latency-sensitive path, checks the return value and, on `RETURN_ERR`, confirms the
+  port's state with `platform_hal_GetMACsecOperationalStatus()` before retrying.
 
 ### Internal Error Handling
 
@@ -309,12 +328,11 @@ itself.
 
 - **Creation.** The interface creates nothing on the caller's behalf and returns no handle. The
   boot-time initialization functions prepare vendor-internal state.
-- **Usage.** The caller allocates and owns the structures the interface reads or fills:
-  `LEDMGMT_PARAMS`, `THERMAL_PLATFORM_CONFIG`, `FW_BANK_INFO`, `INTF_STATS`, `DSCP_list_t` and
-  `hal_network_params_t`.
-- **Destruction.** The caller releases what it allocated. There is no teardown, deinitialization or
-  close function, so the vendor-internal state established at initialization persists for the
-  lifetime of the process.
+- **Usage.** The interface reads or fills `LEDMGMT_PARAMS`, `THERMAL_PLATFORM_CONFIG`,
+  `FW_BANK_INFO`, `INTF_STATS`, `DSCP_list_t` and `hal_network_params_t`; their allocation and
+  release are set out under **Memory Model**.
+- **Destruction.** There is no teardown, deinitialization or close function, so the vendor-internal
+  state established at initialization persists for the lifetime of the process.
 - **Identifiers.** Hardware is addressed by small integer index: a fan index, an Ethernet port
   number, a radio index, an LED index bounded by `LED_BUFFER_SIZE`, a processor selected by
   `RDK_CPUS`, a firmware bank selected by `FW_BANK` and a WAN interface selected by
@@ -388,7 +406,7 @@ sentinel used to check whether an option is valid.
 | `DSCP_Element_t` | One DSCP value with its client count and a fixed array of up to 256 client entries; only the first `numClients` are meaningful. |
 | `DSCP_list_t` | Complete DSCP counting result for one WAN interface: up to 64 elements, of which only the first `numElements` are meaningful. |
 | `FW_BANK` | Firmware bank selector: `ACTIVE_BANK`, `INACTIVE_BANK`. |
-| `FW_BANK_INFO` | Firmware image name and trial-boot state for one bank, as zero-terminated strings. |
+| `FW_BANK_INFO` | Firmware image name and trial-boot state for one bank, as text in `fw_name` and `fw_state`, bounded by `FW_NAME_MAX_LEN` and `FW_STATE_MAX_LEN` respectively; a caller bounds each read to its field's size and does not rely on a terminator. |
 | `INTF_STATS` | Packet and byte counters for one network interface, covering LAN-to-WAN and WAN-to-LAN traffic only. |
 | `ip_version_t` | IP version selector for QoS parameters: `IP_VERSION_IPV4`, `IP_VERSION_IPV6`. |
 | `net_proto_t` | Transport protocol selector for QoS parameters: `PROTOCOL_TCP`, `PROTOCOL_UDP`. |
@@ -604,6 +622,7 @@ so no state diagram is drawn. A caller observes these values by polling.
 ## Source References
 
 - [rdkcentral/rdkb-halif-platform/include/platform_hal.h](https://github.com/rdkcentral/rdkb-halif-platform/blob/develop/include/platform_hal.h) — interface declarations, types and the per-function Doxygen reference
+- [rdkcentral/rdkb-halif-platform/docs/pages/images/Platform_HAL_Architecture.png](https://github.com/rdkcentral/rdkb-halif-platform/blob/develop/docs/pages/images/Platform_HAL_Architecture.png) — module-stack architecture diagram shown under **Description**
 - [rdkcentral/rdkb-halif-platform/CHANGELOG.md](https://github.com/rdkcentral/rdkb-halif-platform/blob/develop/CHANGELOG.md) — release history behind **Version History**
 - [rdkcentral/rdkb-halif-platform/docs/generate_docs.sh](https://github.com/rdkcentral/rdkb-halif-platform/blob/develop/docs/generate_docs.sh) — documentation build and its feature-flag predefines
 - [rdkcentral/rdkb-halif-platform/CONTRIBUTING.md](https://github.com/rdkcentral/rdkb-halif-platform/blob/develop/CONTRIBUTING.md) — contribution and review flow

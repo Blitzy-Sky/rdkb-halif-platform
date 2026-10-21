@@ -102,7 +102,7 @@ functions.
 
 ### Threading Model
 
-**The interface is not thread safe.**
+The interface is not thread safe.
 
 Any module invoking the interface must serialise each call against every other Platform HAL call
 it makes.
@@ -120,12 +120,9 @@ resource against concurrent entry from more than one process.
 ### Memory Model
 
 A function that writes a string into a caller buffer either states a minimum buffer size on its
-declaration or takes a `maxSize` argument giving the size of the buffer supplied:
-`platform_hal_GetSoftwareVersion()`, `platform_hal_GetBootloaderVersion()`,
-`platform_hal_GetFirmwareName()`, `platform_hal_GetPppUserName()` and
-`platform_hal_GetPppPassword()`. A caller passes every string argument zero-terminated; a string
-output is zero-terminated only where its declaration says so, as for
-`platform_hal_GetBaseMacAddress()`.
+declaration or takes a `maxSize` argument giving the size of the buffer supplied, and
+zero-terminates that string only where its declaration says so; a caller passes every string
+argument zero-terminated.
 
 #### Caller Responsibilities
 
@@ -225,10 +222,7 @@ and triage issues and to understand the functional flow of the system. Logging u
 mechanism; `printf` is discouraged unless `syslog` is unavailable. Logging is consistent across all
 HAL components.
 
-Log levels follow Linux standard logging: `FATAL`, `ERROR`, `WARNING`, `NOTICE`, `INFO`, `DEBUG`
-and `TRACE`, in descending order of severity. Each entry carries a timestamp, the log level and a
-message describing the event or condition, so that logs can be parsed consistently across vendors
-and components.
+Log levels follow the Linux standard logging system, in descending order of severity: `FATAL`, `ERROR`, `WARNING`, `NOTICE`, `INFO`, `DEBUG` and `TRACE`. Each log entry carries a timestamp, the log level and a message describing the event or condition.
 
 Because `RETURN_ERR` carries no cause, the implementation logs the cause of every failure it
 detects, including failed fan readings.
@@ -246,19 +240,13 @@ which holds up to 64 `DSCP_Element_t` entries of up to 256 `Traffic_client_t` en
 
 ### Quality Control
 
-The Platform HAL implementation should pass `Coverity`, `Black Duck` and `Valgrind` checks without
-any issue. No memory leak or memory corruption should be introduced by the HAL or by the
-underlying third-party software implementation.
+An implementation should pass analysis with third-party tools such as `Coverity`, `Black Duck` and `Valgrind` without reported issues. Neither the HAL implementation nor the vendor software beneath it may introduce memory leaks or memory corruption.
 
-Any change to a file listed under **Source References** obliges a review of this document. The
-review is addressed to the `rdkcentral/rdkb-halif-platform` maintainers through the repository's
-issue tracker and pull-request review flow, as its contributing guide describes.
+Any change to a file listed under `Source References` obliges a review of this document by the repository maintainers, through the issue and pull-request process `CONTRIBUTING.md` describes.
 
 ### Licensing
 
-The Platform HAL implementation is expected to be released under the Apache License 2.0. The
-licence and notice files delivered at the repository root are published as related pages of the
-generated documentation.
+The interface definition is licensed under the Apache License 2.0, with the full text in `LICENSE` and the attribution notice in `NOTICE`. An implementation of this interface is expected to be released under the Apache License 2.0.
 
 ### Build Requirements
 
@@ -278,14 +266,9 @@ sees is decided by the flags that build defines.
 
 ### Variability Management
 
-Any new function introduced into this interface should be implemented by all third-party modules,
-and the RDK generic code should be compatible with a specific version of the HAL software.
+Changes to the interface are controlled by versioning. Vendors implement a designated version of the interface and move to later versions as their service agreements require. Each interface version follows [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html), and vendor code complies with a specific version. The interface version is identified by the repository's release tag; this document describes release `1.3.3`.
 
-Each interface is versioned using [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html),
-and the vendor code complies with a specific version of the interface. The interface version is
-the repository release that delivers `platform_hal.h`, the most recent being `1.3.3`.
-
-The two compile-time flags under **Optional Components** are the declared variability of this
+The two compile-time flags under `Optional Components` are the declared variability of this
 interface. Within the thermal block, `RETURN_UNSUPPORTED` reports at run time that a platform
 compiles a function in but does not implement it.
 
@@ -322,49 +305,49 @@ exceptions are the DSCP traffic-counting group, which accumulates counters betwe
 stop, and the MACsec group, which starts and stops a protocol on a port.
 
 Sixty-seven of the seventy-one functions return a status code and deliver their result through an
-output argument; the four fan readings named under **Internal Error Handling** return the value
+output argument; the four fan readings named under `Internal Error Handling` return the value
 itself.
 
 #### Object Lifecycles
 
-- **Creation.** The interface creates nothing on the caller's behalf and returns no handle. The
+- **Creation:** The interface creates nothing on the caller's behalf and returns no handle. The
   boot-time initialization functions prepare vendor-internal state.
-- **Usage.** The interface reads or fills `LEDMGMT_PARAMS`, `THERMAL_PLATFORM_CONFIG`,
+- **Usage:** The interface reads or fills `LEDMGMT_PARAMS`, `THERMAL_PLATFORM_CONFIG`,
   `FW_BANK_INFO`, `INTF_STATS`, `DSCP_list_t` and `hal_network_params_t`; their allocation and
-  release are set out under **Memory Model**.
-- **Destruction.** There is no teardown, deinitialization or close function, so the vendor-internal
+  release are set out under `Memory Model`.
+- **Destruction:** There is no teardown, deinitialization or close function, so the vendor-internal
   state established at initialization persists for the lifetime of the process.
-- **Identifiers.** Hardware is addressed by small integer index: a fan index, an Ethernet port
+- **Identifiers:** Hardware is addressed by small integer index: a fan index, an Ethernet port
   number, a radio index, an LED index bounded by `LED_BUFFER_SIZE`, a processor selected by
   `RDK_CPUS`, a firmware bank selected by `FW_BANK` and a WAN interface selected by
   `WAN_INTERFACE`.
 
 #### Method Sequencing
 
-- **Initialization first.** The calls listed under **Initialization and Startup** precede all
+- **Initialization first:** The calls listed under `Initialization and Startup` precede all
   others, and a caller performs the full initialization sequence for its build.
-- **Paired sequences.** `platform_hal_setDscp` with `TRAFFIC_CNT_START` begins traffic counting,
+- **Paired sequences:** `platform_hal_setDscp` with `TRAFFIC_CNT_START` begins traffic counting,
   `platform_hal_getDscpClientList` reads the accumulated counters, `platform_hal_resetDscpCounts`
   clears them and `platform_hal_setDscp` with `TRAFFIC_CNT_STOP` ends counting.
   `platform_hal_StartMACsec` and `platform_hal_StopMACsec` bracket MACsec operation on a port.
   `platform_hal_LoadThermalConfig` supplies the default thresholds a caller may then apply.
-- **Everything else is order-independent** once initialization has completed, subject to the
-  serialisation the **Threading Model** requires.
+- **Other calls:** Everything else is order-independent once initialization has completed,
+  subject to the serialisation the `Threading Model` requires.
 
 #### State-Dependent Behavior
 
-- **Configuration progress.** A caller reads `platform_hal_GetDeviceConfigStatus()` to decide
+- **Configuration progress:** A caller reads `platform_hal_GetDeviceConfigStatus()` to decide
   whether configuration-dependent work may proceed.
-- **Administrative against operational state.** `platform_hal_GetMACsecEnable` reports the
+- **Administrative against operational state:** `platform_hal_GetMACsecEnable` reports the
   administrative setting and `platform_hal_GetMACsecOperationalStatus` reports whether MACsec is
   actually configured at the interface or driver level. The two can legitimately disagree, and a
   caller that needs the state of the link reads the operational one.
-- **Readings change with hardware state.** The fan, temperature, current, power and interface
+- **Readings change with hardware state:** The fan, temperature, current, power and interface
   statistics functions return values that depend on the platform's condition at the time of the
   call.
-- **Build state changes the surface.** Nine functions are absent when their feature flag is
-  undefined (see **Optional Components**), and six thermal functions may return
-  `RETURN_UNSUPPORTED` even when declared (see **Internal Error Handling**).
+- **Build state changes the surface:** Nine functions are absent when their feature flag is
+  undefined (see `Optional Components`), and six thermal functions may return
+  `RETURN_UNSUPPORTED` even when declared (see `Internal Error Handling`).
 
 ### Data Structures and Defines
 
@@ -372,23 +355,23 @@ The types below appear in the signatures of this interface, so a caller construc
 them. All are declared in `platform_hal.h`, which documents the meaning and valid range of every
 member.
 
-**Status codes.** `RETURN_OK`, `RETURN_ERR` and `RETURN_UNSUPPORTED`; their values and the caller
-action for each are set out under **Internal Error Handling**.
+**Status codes:** `RETURN_OK`, `RETURN_ERR` and `RETURN_UNSUPPORTED`; their values and the caller
+action for each are set out under `Internal Error Handling`.
 
-**Primitive type aliases.** `CHAR` for `char`, `UCHAR` for `unsigned char`, `BOOLEAN` for
+**Primitive type aliases:** `CHAR` for `char`, `UCHAR` for `unsigned char`, `BOOLEAN` for
 `unsigned char` carrying `TRUE` or `FALSE`, `INT` for `int`, `UINT` for `unsigned int`, `ULONG` for
 `unsigned long`, and the fixed-width aliases `UINT8_t`, `UINT16_t`, `UINT32_t` and `UINT64_t`.
 `ENABLE`, value 1, denotes an enabled state.
 
-**Buffer and capacity limits.** `FW_NAME_MAX_LEN` 64 and `FW_STATE_MAX_LEN` 64 size the firmware
+**Buffer and capacity limits:** `FW_NAME_MAX_LEN` 64 and `FW_STATE_MAX_LEN` 64 size the firmware
 bank strings; `PLAT_PROC_MEM_MAX_LEN` 40 sizes each memory path string; `LED_BUFFER_SIZE` 3 is the
 number of LED entries a caller may address.
 
-**DHCP option codes.** `DHCPV6_OPT_3` onwards and the DHCPv4 set ending at `DHCPV4_OPT_END`, value
+**DHCP option codes:** `DHCPV6_OPT_3` onwards and the DHCPv4 set ending at `DHCPV4_OPT_END`, value
 255, are the codes carried in the `dhcp_opt` member of `dhcp_opt_list`. `DHCPV4_OPT_END` is the
 sentinel used to check whether an option is valid.
 
-**Enumerations and structures.**
+**Enumerations and structures:**
 
 | Type | What it represents |
 | --- | --- |
@@ -396,11 +379,11 @@ sentinel used to check whether an option is valid.
 | `PLAT_PROC_MEM_INFO` | DRAM and three eMMC storage paths for one processor, each bounded by `PLAT_PROC_MEM_MAX_LEN`. |
 | `LED_COLOR` | LED colour selector, from `LED_WHITE` through the combined colours to `NOT_SUPPORTED`. |
 | `LEDMGMT_PARAMS` | LED configuration: colour, state \- solid or blink \- and blink interval in seconds. |
-| `FAN_SPEED` | Discrete fan speed setting; values under **State Diagram**. |
+| `FAN_SPEED` | Discrete fan speed setting; values under `State Diagram`. |
 | `THERMAL_PLATFORM_CONFIG` | Platform fan configuration: fan count, the three temperature thresholds, minimum run time, monitoring delay, power monitoring and log interval. |
-| `FAN_ERR` | Fan operation error state; values under **State Diagram**. |
+| `FAN_ERR` | Fan operation error state; values under `State Diagram`. |
 | `dhcp_opt_list` | Singly linked list node carrying one DHCPv4 or DHCPv6 option code and its value. |
-| `PSM_STATE` | Power saving mode state, as data-model state only; values under **State Diagram**. |
+| `PSM_STATE` | Power saving mode state, as data-model state only; values under `State Diagram`. |
 | `WAN_INTERFACE` | WAN interface selector for DSCP traffic counting: `DOCSIS`, `EWAN`. |
 | `TRAFFIC_CNT_COMMAND` | Start or stop selector for DSCP traffic counting: `TRAFFIC_CNT_START`, `TRAFFIC_CNT_STOP`. |
 | `Traffic_client_t` | Byte counters for one client against a single DSCP value, with the client MAC address. |
@@ -422,7 +405,7 @@ Each of these types also carries a pointer alias where the interface uses one, f
 The complete declared surface of this interface is the seventy-one functions below, grouped by
 functional area. Sixty-seven return `INT`, two return `UINT`, one returns `BOOLEAN` and one returns
 `int`. Functions marked *flag* are declared only when their feature flag is defined, as set out
-under **Optional Components**.
+under `Optional Components`.
 
 **Boot-time initialization:**
 
@@ -606,25 +589,25 @@ repository `README.md` presents this page; the generated Doxygen site shows thei
 The interface exposes the status values below but does not define the transitions between them,
 so no state diagram is drawn. A caller observes these values by polling.
 
-- **Device configuration progress** \- `platform_hal_GetDeviceConfigStatus` reports
+- **Device configuration progress:** `platform_hal_GetDeviceConfigStatus` reports
   `WaitForImplement`, `In Progress` or `Complete`.
-- **Power saving mode** \- `PSM_STATE` carries `PSM_UNKNOWN`, `PSM_AC`, `PSM_BATT`, `PSM_HOT`,
+- **Power saving mode:** `PSM_STATE` carries `PSM_UNKNOWN`, `PSM_AC`, `PSM_BATT`, `PSM_HOT`,
   `PSM_COOLED` or `PSM_NOT_SUPPORTED`.
-- **Fan state** \- `platform_hal_getFanStatus` reports enabled or disabled and
+- **Fan state:** `platform_hal_getFanStatus` reports enabled or disabled and
   `platform_hal_getRotorLock` the rotor lock status; `FAN_SPEED` enumerates `FAN_SPEED_OFF`,
   `FAN_SPEED_SLOW`, `FAN_SPEED_MEDIUM`, `FAN_SPEED_FAST` and `FAN_SPEED_MAX`; `FAN_ERR` enumerates
   `FAN_ERR_NONE`, `FAN_ERR_HW` and `FAN_ERR_MAX_OVERRIDE_SET`.
-- **MACsec state** \- `platform_hal_GetMACsecEnable` (administrative) and
+- **MACsec state:** `platform_hal_GetMACsecEnable` (administrative) and
   `platform_hal_GetMACsecOperationalStatus` (operational).
-- **Firmware bank state** \- the `fw_state` member of `FW_BANK_INFO` holds `confirmed` or
+- **Firmware bank state:** the `fw_state` member of `FW_BANK_INFO` holds `confirmed` or
   `TrialBoot#0` through `TrialBoot#n`, where the upper bound is vendor specific.
-- **ECO mode** \- `platform_hal_getEcoModeStatus`, per radio module.
+- **ECO mode:** `platform_hal_getEcoModeStatus`, per radio module.
 
 ## Source References
 
 - [rdkcentral/rdkb-halif-platform/include/platform_hal.h](https://github.com/rdkcentral/rdkb-halif-platform/blob/develop/include/platform_hal.h) — interface declarations, types and the per-function Doxygen reference
-- [rdkcentral/rdkb-halif-platform/docs/pages/images/Platform_HAL_Architecture.png](https://github.com/rdkcentral/rdkb-halif-platform/blob/develop/docs/pages/images/Platform_HAL_Architecture.png) — module-stack architecture diagram shown under **Description**
-- [rdkcentral/rdkb-halif-platform/CHANGELOG.md](https://github.com/rdkcentral/rdkb-halif-platform/blob/develop/CHANGELOG.md) — release history behind **Version History**
+- [rdkcentral/rdkb-halif-platform/docs/pages/images/Platform_HAL_Architecture.png](https://github.com/rdkcentral/rdkb-halif-platform/blob/develop/docs/pages/images/Platform_HAL_Architecture.png) — module-stack architecture diagram shown under `Description`
+- [rdkcentral/rdkb-halif-platform/CHANGELOG.md](https://github.com/rdkcentral/rdkb-halif-platform/blob/develop/CHANGELOG.md) — release history behind `Version History`
 - [rdkcentral/rdkb-halif-platform/docs/generate_docs.sh](https://github.com/rdkcentral/rdkb-halif-platform/blob/develop/docs/generate_docs.sh) — documentation build and its feature-flag predefines
 - [rdkcentral/rdkb-halif-platform/CONTRIBUTING.md](https://github.com/rdkcentral/rdkb-halif-platform/blob/develop/CONTRIBUTING.md) — contribution and review flow
 - [rdkcentral/rdkb-halif-platform/LICENSE](https://github.com/rdkcentral/rdkb-halif-platform/blob/develop/LICENSE) — Apache License 2.0 text

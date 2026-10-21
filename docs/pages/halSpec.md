@@ -39,9 +39,10 @@
 ## Description
 
 ```mermaid
-flowchart LR
-    caller["RDK-B Middleware"] --> hal["Platform HAL: platform_hal.h, libhal_platform.so"]
-    hal --> vendor["Vendor Software: board support, drivers and firmware"]
+flowchart TD
+    Caller["RDK-B Middleware"] <--> HAL["Platform HAL - platform_hal.h"]
+    HAL <--> Vendor["Vendor Software"]
+    Vendor <--> Hardware["Board hardware, drivers and firmware"]
 ```
 
 Platform HAL is the RDK-B abstraction over board and device details that belong to no single

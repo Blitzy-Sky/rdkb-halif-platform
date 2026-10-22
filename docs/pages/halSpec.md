@@ -581,9 +581,6 @@ sequenceDiagram
     HAL-->>Caller: RETURN_OK
 ```
 
-The diagrams in this document are fenced `mermaid` blocks. They render on GitHub, where the
-repository `README.md` presents this page; the generated Doxygen site shows their source text.
-
 ### State Diagram
 
 The interface exposes the status values below but does not define the transitions between them,

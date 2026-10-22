@@ -1,1 +1,1 @@
-docs/pages/PlatformhalSpec.md
+docs/pages/halSpec.md
